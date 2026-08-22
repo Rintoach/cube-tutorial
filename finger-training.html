@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Finger-Trick Trainer — Cube Solve Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="finger-training.css">
+</head>
+<body>
+
+  <nav class="stepnav">
+    <div class="stepnav-inner">
+      <div class="stepnav-brand"><span class="dot"></span>CUBE CONSOLE</div>
+      <a class="ft-pill" href="index.html">&#8592; Back to tutorial</a>
+    </div>
+  </nav>
+
+  <main class="trainer-main">
+    <header class="trainer-head">
+      <span class="badge" id="stageBadge">STAGE · LOADING</span>
+      <h1 class="trainer-alg" id="trainerAlg"></h1>
+      <div class="trainer-progress" id="trainerProgress"></div>
+    </header>
+
+    <div class="trainer-console">
+      <div class="trainer-cube-col">
+        <div class="cube-viewport trainer-viewport" id="trainerViewport">
+          <div class="cube-scene" id="trainerScene"></div>
+          <div class="move-arrow pos-top"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+          <div class="move-arrow pos-bottom"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+          <div class="move-arrow pos-left"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+          <div class="move-arrow pos-right"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+          <div class="move-arrow pos-center"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+        </div>
+        <div class="trainer-move-readout">
+          <div class="tr-movebadge" id="trMoveBadge"></div>
+          <div class="tr-plain" id="trPlain"></div>
+          <div class="tr-finger" id="trFinger"></div>
+        </div>
+      </div>
+
+      <div class="trainer-side">
+        <div class="trainer-transport">
+          <button class="tbtn icon" data-act="trprev" title="Previous move">&#8676;</button>
+          <button class="tbtn icon" data-act="trreplay" title="Replay this move">&#8635;</button>
+          <button class="tbtn play" data-act="trplay">&#9654; Play sequence</button>
+          <button class="tbtn icon" data-act="trnext" title="Next move">&#8677;</button>
+        </div>
+
+        <div class="trainer-speedrow">
+          <span>SPEED</span>
+          <div class="speed-opts" id="trainerSpeedOpts">
+            <button class="speed-opt" data-speed="verySlow">Very Slow</button>
+            <button class="speed-opt active" data-speed="slow">Slow</button>
+            <button class="speed-opt" data-speed="medium">Medium</button>
+          </div>
+        </div>
+
+        <div class="trainer-stagepicker" id="stagePicker">
+          <span class="lbl">Choose an algorithm</span>
+          <div class="tr-stage-list"></div>
+        </div>
+
+        <div class="trainer-result" id="trainerResult"></div>
+
+        <div class="trainer-disclaimer">
+          <strong>A note on finger tricks:</strong> techniques vary by hand size, cube type, and comfort — use these as a starting grip, not a strict rule. Accuracy matters more than speed; slow the pace down until every move is clean, then let speed follow on its own.
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script src="cube-engine.js"></script>
+<script src="finger-training.js"></script>
+</body>
+</html>

@@ -363,6 +363,7 @@
   .movelist-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
   .movelist-head .lbl{ font:700 11px var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); }
   .movelist{ display:flex; flex-direction:column; gap:6px; }
+  .practice-link{ margin-top:12px; width:100%; justify-content:center; }
   .move-row{
     display:flex; align-items:center; gap:12px;
     padding:9px 12px;
