@@ -43,7 +43,7 @@
           <div class="move-arrow pos-center"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
         </div>
         <div class="trainer-move-readout">
-          <div class="tr-movebadge" id="trMoveBadge"></div>
+          <div class="tr-movebadge" id="trMoveBadge" aria-live="polite"></div>
           <div class="tr-plain" id="trPlain"></div>
           <div class="tr-finger" id="trFinger"></div>
         </div>
@@ -51,18 +51,18 @@
 
       <div class="trainer-side">
         <div class="trainer-transport">
-          <button class="tbtn icon" data-act="trprev" title="Previous move">&#8676;</button>
-          <button class="tbtn icon" data-act="trreplay" title="Replay this move">&#8635;</button>
-          <button class="tbtn play" data-act="trplay">&#9654; Play sequence</button>
-          <button class="tbtn icon" data-act="trnext" title="Next move">&#8677;</button>
+          <button class="tbtn icon" data-act="trprev" title="Previous move (←)" aria-label="Previous move">&#8676;</button>
+          <button class="tbtn icon" data-act="trreplay" title="Replay this move (R)" aria-label="Replay this move">&#8635;</button>
+          <button class="tbtn play" data-act="trplay" title="Play/pause sequence (space)">&#9654; Play sequence</button>
+          <button class="tbtn icon" data-act="trnext" title="Next move (→)" aria-label="Next move">&#8677;</button>
         </div>
 
         <div class="trainer-speedrow">
           <span>SPEED</span>
           <div class="speed-opts" id="trainerSpeedOpts">
-            <button class="speed-opt" data-speed="verySlow">Very Slow</button>
-            <button class="speed-opt active" data-speed="slow">Slow</button>
-            <button class="speed-opt" data-speed="medium">Medium</button>
+            <button class="speed-opt" data-speed="verySlow" title="Key: 1">Very Slow</button>
+            <button class="speed-opt active" data-speed="slow" title="Key: 2">Slow</button>
+            <button class="speed-opt" data-speed="medium" title="Key: 3">Medium</button>
           </div>
         </div>
 
@@ -71,7 +71,7 @@
           <div class="tr-stage-list"></div>
         </div>
 
-        <div class="trainer-result" id="trainerResult"></div>
+        <div class="trainer-result" id="trainerResult" aria-live="polite"></div>
 
         <div class="trainer-disclaimer">
           <strong>A note on finger tricks:</strong> techniques vary by hand size, cube type, and comfort — use these as a starting grip, not a strict rule. Accuracy matters more than speed; slow the pace down until every move is clean, then let speed follow on its own.

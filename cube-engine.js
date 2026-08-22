@@ -99,6 +99,29 @@ function resetCube(sceneEl, existing){
 // then settles back flush (SETTLE_MS). Logical state only updates at the end.
 const LIFT_MS = 120, SETTLE_MS = 150;
 
+// True when the OS/browser has "reduce motion" turned on. Read fresh on every
+// call (not cached at load) so toggling the OS setting mid-session takes
+// effect on the very next move — matchMedia() itself is cheap to create.
+// Guarded for non-browser contexts (e.g. if this file is ever required
+// somewhere without a `window`) even though animateMove() itself is always
+// DOM-only and never runs there.
+function prefersReducedMotion(){
+  return typeof window !== 'undefined' && !!window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+// Single source of truth for a move's three phase-durations, shared by
+// animateMove() and totalMoveMs() so autoplay's scheduling (moveTotalMs in
+// StageController) never drifts out of sync with what animateMove() actually
+// does. Under reduced motion the lift/settle phases (the part that's purely
+// decorative flourish) collapse to 0, and the turn itself is capped short —
+// still a real, awaited transition (so onDone timing stays correct), just
+// too brief to read as a "spin."
+function motionTimings(durationMs){
+  if(prefersReducedMotion()) return { lift:0, settle:0, spin: Math.min(durationMs, 60) };
+  return { lift:LIFT_MS, settle:SETTLE_MS, spin: durationMs };
+}
+
 function animateMove(sceneEl, cubies, move, durationMs, onDone){
   const { axis, layer, angle } = parseMove(move);
   const idx = {x:0,y:1,z:2}[axis];
@@ -110,6 +133,7 @@ function animateMove(sceneEl, cubies, move, durationMs, onDone){
   layerEl.appendChild(group);
   moving.forEach(c => group.appendChild(c.el));
 
+  const { lift: LIFT_T, settle: SETTLE_T, spin: SPIN_T } = motionTimings(durationMs);
   const cssAngle = cssAngleFor(axis, angle);
   const LIFT = 13;
   const liftSign = axis==='y' ? -layer : layer;
@@ -120,7 +144,7 @@ function animateMove(sceneEl, cubies, move, durationMs, onDone){
   const AX = axis.toUpperCase();
 
   // phase 1: lift off the cube face
-  group.style.transition = `transform ${LIFT_MS}ms cubic-bezier(.2,.8,.3,1)`;
+  group.style.transition = `transform ${LIFT_T}ms cubic-bezier(.2,.8,.3,1)`;
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
       group.style.transform = `${liftT} rotate${AX}(0deg) scale(1.05)`;
@@ -129,15 +153,15 @@ function animateMove(sceneEl, cubies, move, durationMs, onDone){
 
   // phase 2: spin the turn while lifted
   setTimeout(()=>{
-    group.style.transition = `transform ${durationMs}ms cubic-bezier(.45,.05,.55,.95)`;
+    group.style.transition = `transform ${SPIN_T}ms cubic-bezier(.45,.05,.55,.95)`;
     group.style.transform = `${liftT} rotate${AX}(${cssAngle}deg) scale(1.05)`;
-  }, LIFT_MS);
+  }, LIFT_T);
 
   // phase 3: settle flush again
   setTimeout(()=>{
-    group.style.transition = `transform ${SETTLE_MS}ms cubic-bezier(.3,.1,.25,1)`;
+    group.style.transition = `transform ${SETTLE_T}ms cubic-bezier(.3,.1,.25,1)`;
     group.style.transform = `${flatT} rotate${AX}(${cssAngle}deg) scale(1)`;
-  }, LIFT_MS + durationMs);
+  }, LIFT_T + SPIN_T);
 
   setTimeout(()=>{
     moving.forEach(c=>{
@@ -149,9 +173,12 @@ function animateMove(sceneEl, cubies, move, durationMs, onDone){
     });
     group.remove();
     if(onDone) onDone();
-  }, LIFT_MS + durationMs + SETTLE_MS + 20);
+  }, LIFT_T + SPIN_T + SETTLE_T + 20);
 }
-function totalMoveMs(durationMs){ return LIFT_MS + durationMs + SETTLE_MS; }
+function totalMoveMs(durationMs){
+  const { lift, settle, spin } = motionTimings(durationMs);
+  return lift + spin + settle;
+}
 
 /* =====================================================================
    MOVE VISUAL METADATA (arrows + plain-language hints)
@@ -297,12 +324,12 @@ class StageController{
           </div>
           <div class="transport">
             <div class="transport-row">
-              <button class="tbtn icon" data-act="reset" title="Reset">&#8635;</button>
-              <button class="tbtn icon" data-act="prev" title="Previous move">&#8676;</button>
-              <button class="tbtn play" data-act="play">&#9654; Play</button>
-              <button class="tbtn icon" data-act="next" title="Next move">&#8677;</button>
+              <button class="tbtn icon" data-act="reset" title="Reset" aria-label="Reset stage">&#8635;</button>
+              <button class="tbtn icon" data-act="prev" title="Previous move (←)" aria-label="Previous move">&#8676;</button>
+              <button class="tbtn play" data-act="play" title="Play/pause (space)">&#9654; Play</button>
+              <button class="tbtn icon" data-act="next" title="Next move (→)" aria-label="Next move">&#8677;</button>
             </div>
-            <div class="status-line">Ready</div>
+            <div class="status-line" aria-live="polite">Ready</div>
           </div>
         </div>
         <div class="movelist-col">
@@ -550,5 +577,6 @@ if(typeof module !== 'undefined' && module.exports){
     rotVec, parseMove, applyMoveLogic, makeCubies,
     FACE_AXIS, FACE_ANGLE, FACE_LAYER, MOVE_VISUAL, ICON_GLYPH, FACE_INFO,
     STAGES, SPEED_MS, GAP_MS, DOUBLE_PAUSE_MS, FINGER_TRICKS,
+    prefersReducedMotion, motionTimings, totalMoveMs,
   };
 }

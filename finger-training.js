@@ -68,6 +68,24 @@ function handIconsFor(handLabel, fingerLabel){
   return handSVG(active, handLabel === 'Left hand');
 }
 
+/* =====================================================================
+   SAVED SPEED (localStorage) — separate key from the main tutorial's,
+   since the trainer offers a different speed set (adds "verySlow", no
+   "fast"). Wrapped in try/catch: storage-disabled just means the speed
+   choice doesn't persist, nothing breaks.
+   ===================================================================== */
+const TRAINER_SAVE_KEY = 'cubeTrainer.v1';
+function loadTrainerSaved(){
+  try{
+    const raw = localStorage.getItem(TRAINER_SAVE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveTrainerSpeed(speed){
+  try{ localStorage.setItem(TRAINER_SAVE_KEY, JSON.stringify({ speed })); }
+  catch(e){ /* no-op */ }
+}
+
 function stepsForAlg(alg){
   const steps = [];
   alg.split(' ').forEach(token=>{
@@ -105,7 +123,8 @@ class Trainer{
       center: this.viewportEl.querySelector('.move-arrow.pos-center'),
     };
 
-    this.speed = 'slow';
+    const saved = loadTrainerSaved();
+    this.speed = (saved.speed && SPEED_MS[saved.speed]) ? saved.speed : 'slow';
     this.playing = false;
     this.animating = false;
     this.timer = null;
@@ -113,7 +132,22 @@ class Trainer{
     this.buildStagePicker();
     this.wireTransport();
     this.wireSpeed();
+    this.wireKeyboard();
+    if(this.speed !== 'slow'){
+      document.querySelectorAll('#trainerSpeedOpts .speed-opt').forEach(b=>{
+        b.classList.toggle('active', b.dataset.speed === this.speed);
+      });
+    }
     this.loadStage(this.stageFromQuery(), false);
+  }
+
+  setSpeed(speed){
+    if(!SPEED_MS[speed]) return;
+    this.speed = speed;
+    document.querySelectorAll('#trainerSpeedOpts .speed-opt').forEach(b=>{
+      b.classList.toggle('active', b.dataset.speed === speed);
+    });
+    saveTrainerSpeed(speed);
   }
 
   stageFromQuery(){
@@ -136,11 +170,29 @@ class Trainer{
 
   wireSpeed(){
     document.querySelectorAll('#trainerSpeedOpts .speed-opt').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        document.querySelectorAll('#trainerSpeedOpts .speed-opt').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        this.speed = btn.dataset.speed;
-      });
+      btn.addEventListener('click', ()=> this.setSpeed(btn.dataset.speed));
+    });
+  }
+
+  // Space = play/pause, ← / → = step back/forward, R = replay from the top,
+  // 1/2/3 = Very Slow/Slow/Medium (this page's three speed options, in the
+  // order they're listed). Ignored while a text field has focus; a focused
+  // button does NOT block these, same reasoning as the main tutorial page.
+  wireKeyboard(){
+    const ignore = (t) => {
+      const tag = (t && t.tagName || '').toLowerCase();
+      return tag === 'input' || tag === 'textarea' || tag === 'select' || (t && t.isContentEditable);
+    };
+    document.addEventListener('keydown', (e)=>{
+      if(ignore(e.target)) return;
+      if(e.metaKey || e.ctrlKey || e.altKey) return;
+      if(e.key === '1'){ this.setSpeed('verySlow'); return; }
+      if(e.key === '2'){ this.setSpeed('slow'); return; }
+      if(e.key === '3'){ this.setSpeed('medium'); return; }
+      if(e.key === ' '){ e.preventDefault(); this.togglePlay(); return; }
+      if(e.key === 'ArrowRight'){ e.preventDefault(); this.stopPlaying(); this.playStep(); return; }
+      if(e.key === 'ArrowLeft'){ e.preventDefault(); this.stopPlaying(); this.jumpTo(this.idx-1); return; }
+      if(e.key === 'r' || e.key === 'R'){ e.preventDefault(); this.stopPlaying(); this.jumpTo(0); this.togglePlay(); return; }
     });
   }
 
