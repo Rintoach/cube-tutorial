@@ -37,6 +37,28 @@
 .tr-dot.done{ background:var(--good); border-color:var(--good); }
 .tr-dot.current{ background:var(--accent); border-color:var(--accent); box-shadow:0 0 10px var(--accent-soft-2); transform:scale(1.35); }
 
+/* ---- fixed goal/hold info panel ---- */
+.trainer-info{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px 20px;
+  margin-bottom:20px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.ti-row{ display:flex; gap:10px; align-items:baseline; font-size:14px; color:#d8e2ee; line-height:1.5; }
+.ti-label{
+  flex-shrink:0; width:96px;
+  font:700 11px var(--font-mono); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--accent);
+}
+.ti-note{
+  font-size:12.5px; color:var(--text-faint);
+  border-top:1px solid var(--border-soft);
+  padding-top:10px; margin-top:2px;
+}
+.ti-note strong{ color:var(--text-dim); }
+
 /* ---- console layout ---- */
 .trainer-console{
   display:grid;

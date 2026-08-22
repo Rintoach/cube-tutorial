@@ -37,6 +37,8 @@ class Trainer{
     this.plainEl = document.getElementById('trPlain');
     this.fingerEl = document.getElementById('trFinger');
     this.resultEl = document.getElementById('trainerResult');
+    this.goalEl = document.getElementById('tiGoal');
+    this.holdEl = document.getElementById('tiHold');
     this.playBtn = document.querySelector('[data-act="trplay"]');
     this.arrows = {
       top: this.viewportEl.querySelector('.move-arrow.pos-top'),
@@ -114,6 +116,8 @@ class Trainer{
     });
     this.badgeEl.textContent = `STAGE ${i+1} · ${this.data.title.toUpperCase()}`;
     this.algEl.textContent = this.data.alg;
+    this.goalEl.textContent = this.data.desc;
+    this.holdEl.innerHTML = this.data.hold || '—';
     this.resultEl.classList.remove('show');
 
     this.buildProgressDots();

@@ -187,24 +187,31 @@ const FACE_INFO = [
 const STAGES = [
   { title:"White Cross", desc:"Solve the four white edges around the bottom center, matching each edge's side color to its center.",
     alg:"F2 R2", before:"R2 F2".split(' '),
-    hold:"White center facing you as you scan for edges; the demo starts from a scrambled cross on purpose so you can see edges being placed, not just admired.",
+    hold:"White layer on the <strong>bottom</strong> for this whole stage — tilt the cube down to see the white center as you scan for edges. This is the orientation you'll keep all the way through Stage 6; the demo starts from a scrambled cross on purpose so you can see edges being placed, not just admired.",
     tip:'Align the side color of the white edge with its center, then spin that face <code>180°</code> to bring the edge into the cross. In practice the setup differs edge-to-edge — sometimes it\'s already in the top layer facing the wrong way, sometimes it\'s buried in the bottom layer — so treat this as one representative case, not a single formula that always applies.' },
   { title:"White Corners (First Layer)", desc:"Insert the four white corners to finish the entire first layer.",
     alg:"R U R' U'", before:"U R U' R'".split(' '),
-    hold:"White layer on top. Find a white corner sticker facing <strong>sideways</strong> (not straight up) in the top layer, rotate the top until it sits directly above its empty slot, and hold the cube so that empty slot is at the front-right-up.",
-    tip:'Position the target corner directly above its empty slot. Repeat <code>R U R\' U\'</code> — the "righty" trigger — until the white sticker faces up. Three things trip beginners up here: (1) if the white sticker faces <strong>straight up</strong> instead of sideways, hold that corner above any still-empty slot and run the trigger once anyway — it flips the white to the side without touching your cross; (2) if a corner is already in the right slot but twisted, run the trigger once to pop it back out, then treat it as a fresh piece; (3) if the piece is stuck in the bottom layer facing the wrong way, run the trigger once to kick it up into the top layer first.' },
+    hold:"White layer stays on the <strong>bottom</strong> — the corners you're inserting start out loose in the top layer. Find a white corner sticker facing <strong>sideways</strong> (not straight up) in the top layer, rotate the top layer until it sits directly above its empty slot in the bottom layer, and hold the cube so that empty slot is at the front-right, on the bottom.",
+    tip:'Position the target corner directly above its empty slot. Repeat <code>R U R\' U\'</code> — the "righty" trigger — until the white sticker faces <strong>down</strong> into the bottom layer. Three things trip beginners up here: (1) if the white sticker faces <strong>straight up</strong> instead of sideways, hold that corner above any still-empty slot and run the trigger once anyway — it flips the white to the side without touching your cross; (2) if a corner is already in the right slot but twisted, run the trigger once to pop it back out, then treat it as a fresh piece; (3) if the piece is stuck in the bottom layer facing the wrong way, run the trigger once to kick it up into the top layer first.' },
   { title:"Second Layer Edges", desc:"Slot the four non-yellow edges into the middle layer.",
     alg:"U R U' R' U' F' U F", before:"F' U' F U R U R' U'".split(' '),
     hold:"White layer stays on the bottom, untouched, for this whole stage. Hold the cube with the target edge's slot at the front-right.",
-    tip:'Match the edge\'s front-facing color to the center below it, then run the full formula to insert it to the right.' },
+    tip:'Match the edge\'s front-facing color to the center below it, then run the full formula to insert it to the right.',
+    cases:[
+      { title:"The edge needs to go left instead of right", body:'Use the mirror algorithm instead: <code>U\' L\' U L U F U\' F\'</code> — same idea, opposite side. Match the edge\'s front-facing color to the center below it, then run this to insert it to the left. (Verified: this mirror returns the cube to solved from its own matching setup, exactly like the right-hand version.)' },
+      { title:"No non-yellow edge is anywhere in the top layer", body:'A common stuck point — it means a wrong edge is already sitting in one of the middle slots. Run either insertion algorithm once (right or left, whichever slot is currently wrong) to eject that edge back up into the top layer, then insert it correctly using the matching algorithm above.' },
+    ] },
   { title:"Yellow Cross", desc:"Form a yellow cross on top of the cube.",
     alg:"F R U R' U' F'", before:"F U R U' R' F'".split(' '),
-    hold:"Flip the cube so the finished white layer and second layer are now on the bottom and yellow is up — this is the orientation you'll keep for the rest of the solve.",
-    tip:'Check your top layer against three shapes before you start: a <strong>dot</strong> (no yellow edges up at all) needs the formula <strong>3 times</strong>; an <strong>L-shape</strong> (two yellow edges touching, in a corner) needs it <strong>twice</strong>; a straight <strong>line</strong> through the middle needs it just <strong>once</strong>. Always re-check the shape after each run before deciding whether to repeat — don\'t just run it a fixed number of times blindly.' },
+    hold:"White layer and second layer stay on the bottom, unchanged since Stage 1 — you never actually flip the cube. Yellow is already facing up; this is the orientation you'll keep for the rest of the solve.",
+    tip:'Check your top layer against three shapes before you start — and get the <strong>rotation</strong> right, not just the shape. Spin only the top layer (never F or R) to line the pattern up: a <strong>dot</strong> (no yellow edges up at all) has no direction to match — run the formula once, then re-diagnose; an <strong>L-shape</strong> (two yellow edges touching, in a corner) needs those two yellow edges at the <strong>back and left</strong> specifically — spin the top until they land there, then run it <strong>twice</strong>; a straight <strong>line</strong> needs its two yellow edges running <strong>left-to-right</strong>, not front-to-back — spin into place, then run it just <strong>once</strong>. Getting the shape right but the rotation wrong is the single most common way this stage stalls (verified: the same formula run from a mirrored L or a front-back line does not make progress toward solved) — always re-check both the shape and its rotation after every run.' },
   { title:"Match Top Edges", desc:"Swap the front and left yellow edges so each one lines up with its matching side center (the cross stays a cross the whole time).",
     alg:"R U R' U R U2 R' U", before:"U' R U2 R' U' R U' R'".split(' '),
     hold:"Yellow layer on top. Spin the top layer until you find two edges that already match their center. Hold the cube so those two sit at the <strong>back</strong> and <strong>right</strong> — the two mismatched edges end up at the front and left, which is exactly what this formula swaps.",
-    tip:'This trigger swaps only the <strong>front</strong> and <strong>left</strong> yellow edges and leaves back/right alone. If your two matching edges are already opposite each other rather than side-by-side, run it once, spin the top to re-diagnose which two now match, then run it again on whichever pair is still wrong.' },
+    tip:'This trigger swaps only the <strong>front</strong> and <strong>left</strong> yellow edges and leaves back/right alone. If your two matching edges are already opposite each other rather than side-by-side, run it once, spin the top to re-diagnose which two now match, then run it again on whichever pair is still wrong.',
+    cases:[
+      { title:"Anything other than two adjacent matching edges", body:'This algorithm is a single fixed swap: it always swaps whatever sits at front and left, and always leaves back and right exactly where they are. If you don\'t have two side-by-side matches to place at back+right — zero matches, one match, or two matches directly opposite each other — there is no one-shot placement that solves it immediately. Run the algorithm once anyway, then re-diagnose the new pattern; it will typically turn into (or become) the back+right-matching case within one more run. (Verified by simulation: placing two opposite matches at front/back and running once does not solve it — don\'t expect a fixed rule for every starting pattern, always re-check after each attempt.)' },
+    ] },
   { title:"Position Top Corners", desc:"Cycle the last-layer corners into their correct positions (orientation comes next — colors may still be twisted).",
     alg:"R U' L' U R' U' L U", before:"U' L' U R U' L U R'".split(' '),
     hold:"Yellow layer on top. Look for any corner that's already in its correct spot (even if twisted) and hold the cube with that corner at the front-<strong>left</strong>-up.",
@@ -303,6 +310,13 @@ class StageController{
       </div>
       ${this.data.hold ? `<div class="hold-tip"><strong>&#9995; Hold it like this:</strong> ${this.data.hold}</div>` : ''}
       <div class="guide-tip"><strong>Tip:</strong> ${this.data.tip}</div>
+      ${this.data.cases && this.data.cases.length ? `
+      <details class="cases-box">
+        <summary>My cube doesn't look like the example — other starting cases</summary>
+        <div class="cases-list">
+          ${this.data.cases.map(c => `<div class="case-item"><div class="case-title">${c.title}</div><div class="case-body">${c.body}</div></div>`).join('')}
+        </div>
+      </details>` : ''}
     `;
 
     this.sceneEl = this.el.querySelector('.cube-scene');
