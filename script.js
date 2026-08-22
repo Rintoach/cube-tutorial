@@ -185,7 +185,7 @@ const STAGES = [
   { title:"White Corners (First Layer)", desc:"Insert the four white corners to finish the entire first layer.",
     alg:"R U R' U'", before:"U R U' R'".split(' '),
     hold:"White layer on top. Find a white corner sticker facing <strong>sideways</strong> (not straight up) in the top layer, rotate the top until it sits directly above its empty slot, and hold the cube so that empty slot is at the front-right-up.",
-    tip:'Position the target corner directly above its empty slot. Repeat <code>R U R\' U\'</code> — the "righty" trigger — until the white sticker faces down. Three things trip beginners up here: (1) if the white sticker faces <strong>straight up</strong> instead of sideways, hold that corner above any still-empty slot and run the trigger once anyway — it flips the white to the side without touching your cross; (2) if a corner is already in the right slot but twisted, run the trigger once to pop it back out, then treat it as a fresh piece; (3) if the piece is stuck in the bottom layer facing the wrong way, run the trigger once to kick it up into the top layer first.' },
+    tip:'Position the target corner directly above its empty slot. Repeat <code>R U R\' U\'</code> — the "righty" trigger — until the white sticker faces up. Three things trip beginners up here: (1) if the white sticker faces <strong>straight up</strong> instead of sideways, hold that corner above any still-empty slot and run the trigger once anyway — it flips the white to the side without touching your cross; (2) if a corner is already in the right slot but twisted, run the trigger once to pop it back out, then treat it as a fresh piece; (3) if the piece is stuck in the bottom layer facing the wrong way, run the trigger once to kick it up into the top layer first.' },
   { title:"Second Layer Edges", desc:"Slot the four non-yellow edges into the middle layer.",
     alg:"U R U' R' U' F' U F", before:"F' U' F U R U R' U'".split(' '),
     hold:"White layer stays on the bottom, untouched, for this whole stage. Hold the cube with the target edge's slot at the front-right.",
@@ -203,9 +203,9 @@ const STAGES = [
     hold:"Yellow layer on top. Look for any corner that's already in its correct spot (even if twisted) and hold the cube with that corner at the front-<strong>left</strong>-up.",
     tip:'Keep the one correctly-placed corner at the front-left-up the whole time — this formula leaves that exact corner untouched. It cycles the other three corners around it; run it twice if the first pass doesn\'t land them all, or once if none of your corners started correctly placed.' },
   { title:"Orient Top Corners & Finish", desc:"Flip the cube over, then twist each remaining corner in place until every one shows yellow on top.",
-    alg:"R U R' U'", before:"U R U' R'".split(' '), flip:true,
-    hold:"Flip the whole cube over — the solved white layer is now on top, yellow is on the bottom. Hold a wrong-way yellow corner at the front-right-<em>bottom</em> and never rotate anything except the right layer, the top layer, and (between corners) the bottom layer.",
-    tip:'Repeat <code>R U R\' U\'</code> once or twice on the front-right-bottom corner until it shows the solved color on the bottom. Then turn <em>only the bottom layer</em> to bring the next wrong corner into that same spot and repeat — never the top, or you\'ll undo corners you already fixed. The rest of the cube may look scrambled in between corners — that\'s expected, it locks together once all four are fixed. Flip the cube back over at the end to see it solved.' },
+    alg:"R' D' R D", before:"D' R' D R".split(' '), flip:true,
+    hold:"Flip the whole cube over — the solved white layer is now on top, yellow is on the bottom. Hold a wrong-way yellow corner at the front-right-<em>bottom</em> and never rotate anything except the right layer and (between corners) the bottom layer — the top layer doesn't turn again for the rest of the solve.",
+    tip:'Repeat <code>R\' D\' R D</code> two or four times on the front-right-bottom corner until it shows the solved color on the bottom. Then turn <em>only the bottom layer</em> to bring the next wrong corner into that same spot and repeat — never the top, or you\'ll undo corners you already fixed. The rest of the bottom layer may look scrambled in between corners — that\'s expected, it locks together once all four are fixed. Flip the cube back over at the end to see it solved.' },
 ];
 
 /* =====================================================================
@@ -230,17 +230,21 @@ const DOUBLE_FACTOR = 1.45; // slow: ~1.9s, normal: ~0.94s, fast: ~0.49s
 const GAP_MS = { slow:450, normal:260, fast:150 }; // pause after each move during auto-play
 let GLOBAL_SPEED = 'normal';
 
+// These are common starting-point grips, not the only correct way to hold a
+// turn — comfortable technique varies from cuber to cuber. The standard "home"
+// grip is index fingers resting near the U layer with middle/ring fingers
+// supporting from below; treat every cue here as a suggestion to try first.
 const FINGER_TRICKS = {
-  "R":  { hand:'Right hand', finger:'Middle finger', cue:'Push the front-right edge straight up, pivoting off the middle finger — thumb and index stay put.' },
+  "R":  { hand:'Right hand', finger:'Middle finger', cue:'One common approach: push the front-right edge straight up, pivoting off the middle finger — thumb and index stay put.' },
   "R'": { hand:'Right hand', finger:'Index finger',  cue:'Hook the same edge with your index finger and pull it back down to the front.' },
   "L":  { hand:'Left hand',  finger:'Index finger',  cue:'Push the front-left edge straight down.' },
   "L'": { hand:'Left hand',  finger:'Ring finger',   cue:'Push the same edge back up to the front.' },
   "U":  { hand:'Right hand', finger:'Index / thumb', cue:'Sweep the top layer left — keep the left hand still and low on the cube.' },
   "U'": { hand:'Right hand', finger:'Index / thumb', cue:'Sweep the top layer right with the same steady left hand.' },
-  "D":  { hand:'Right hand', finger:'Thumb',         cue:'Roll the bottom-front edge right without turning the whole cube over.' },
-  "D'": { hand:'Left hand',  finger:'Thumb',         cue:'Roll the bottom-front edge left.' },
-  "F":  { hand:'Both hands', finger:'Thumbs',        cue:'Spin the front face clockwise like a small steering wheel.' },
-  "F'": { hand:'Both hands', finger:'Thumbs',        cue:'Spin the front face counter-clockwise.' },
+  "D":  { hand:'Right hand', finger:'Thumb',         cue:'A workable option: roll the bottom-front edge right without turning the whole cube over. Less universal than the other grips here — many cubers turn D with whichever hand is free instead.' },
+  "D'": { hand:'Left hand',  finger:'Thumb',         cue:'Same idea, other direction: roll the bottom-front edge left. Feel free to swap hands if that\'s more natural for you.' },
+  "F":  { hand:'Both hands', finger:'Thumbs',        cue:'A beginner-friendly way to start: spin the front face clockwise like a small steering wheel. As you speed up, most cubers switch to a quicker one-hand push instead.' },
+  "F'": { hand:'Both hands', finger:'Thumbs',        cue:'Same steering-wheel motion in reverse, counter-clockwise — again, a good starting point rather than the fastest long-term technique.' },
 };
 
 class StageController{
