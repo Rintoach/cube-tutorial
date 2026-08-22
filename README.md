@@ -5,7 +5,7 @@ An interactive, move-by-move Rubik's Cube tutorial built around a custom 3D CSS 
 ## Features
 
 - **Full 3D cube engine** — a from-scratch cubie/sticker model (not a pre-built library), verified against unit tests for rotation correctness.
-- **Move-by-move playback** — step forward/back through each stage's algorithm, or auto-play at adjustable speed (Slow / Normal / Fast), with visible directional arrows for every turn.
+- **Move-by-move playback** — step forward/back through each stage's algorithm, or auto-play at adjustable speed (Slow / Medium / Fast, Slow by default), with visible directional arrows for every turn. Double ("2") turns play as two separate quarter-turns with a pause between them, so they're as easy to follow as any other move.
 - **Realistic starting states** — each stage opens from a plausible pre-solve position (computed as the exact inverse of that stage's algorithm), not an already-solved cube.
 - **Holding-position guidance** — every stage tells you which layer should be "up" and where to hold the piece you're working on before you start.
 - **Cube Basics primer** — a short anatomy/orientation section for total beginners, before the stages begin.

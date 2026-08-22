@@ -223,12 +223,14 @@ FACE_INFO.forEach(f=>{
    STAGE CONTROLLER
    ===================================================================== */
 // Quarter-turn duration per speed. Slow sits at ~1.3s/turn (the 1.2–1.4s
-// range that actually reads as "slow enough to follow"); double ("2") turns
-// run DOUBLE_FACTOR longer since they cover twice the rotation.
-const SPEED_MS = { slow:1300, normal:650, fast:340 };
-const DOUBLE_FACTOR = 1.45; // slow: ~1.9s, normal: ~0.94s, fast: ~0.49s
-const GAP_MS = { slow:450, normal:260, fast:150 }; // pause after each move during auto-play
-let GLOBAL_SPEED = 'normal';
+// range that actually reads as "slow enough to follow"). A double ("2") move
+// is played as two separate quarter-turns with a distinct pause between them
+// (DOUBLE_PAUSE_MS) rather than one continuous 180° sweep, so it reads as
+// "turn, then turn again" instead of a single hard-to-follow blur.
+const SPEED_MS = { slow:1300, medium:650, fast:340 };
+const GAP_MS = { slow:450, medium:260, fast:150 }; // pause after each move during auto-play
+const DOUBLE_PAUSE_MS = { slow:600, medium:380, fast:220 }; // pause between the two halves of a "2" move
+let GLOBAL_SPEED = 'slow';
 
 // These are common starting-point grips, not the only correct way to hold a
 // turn — comfortable technique varies from cuber to cuber. The standard "home"
@@ -259,6 +261,7 @@ class StageController{
     this.speed = GLOBAL_SPEED;
     this.done = false;
     this.timer = null;
+    this.halfTimer = null;
     this.render();
     this.wire();
   }
@@ -361,11 +364,39 @@ class StageController{
     });
   }
 
-  // Quarter turns and double (180°) turns get different durations so a "2"
-  // move doesn't look like it snapped through twice as far in the same time.
+  // Every quarter-turn (half of a "2" move included) plays at the same
+  // per-speed duration — see playMove() for how a "2" move is split in two.
   duration(move){
-    const base = SPEED_MS[this.speed];
-    return (move && move.includes('2')) ? Math.round(base * DOUBLE_FACTOR) : base;
+    return SPEED_MS[this.speed];
+  }
+
+  // Total wall-clock time a move takes to finish playing, including the
+  // pause between the two halves of a double ("2") move. Used to schedule
+  // the next autoplay tick.
+  moveTotalMs(move){
+    const q = this.duration(move);
+    return (move && move.includes('2'))
+      ? totalMoveMs(q) * 2 + DOUBLE_PAUSE_MS[this.speed]
+      : totalMoveMs(q);
+  }
+
+  // Plays one listed move. A "2" move (e.g. R2) is played as two separate
+  // quarter-turns of the same face with a visible pause between them, so
+  // beginners can actually see it turn twice instead of one fast 180° blur.
+  // Uses its own halfTimer (not this.timer, which autoStep() uses to
+  // schedule the *next* move) so the two timers never clobber each other.
+  playMove(move, dur, onDone){
+    clearTimeout(this.halfTimer);
+    if(move && move.includes('2')){
+      const face = move[0];
+      animateMove(this.sceneEl, this.cubies, face, dur, ()=>{
+        this.halfTimer = setTimeout(()=>{
+          animateMove(this.sceneEl, this.cubies, face, dur, onDone);
+        }, DOUBLE_PAUSE_MS[this.speed]);
+      });
+    } else {
+      animateMove(this.sceneEl, this.cubies, move, dur, onDone);
+    }
   }
 
   setSpeed(speed){
@@ -402,7 +433,7 @@ class StageController{
   }
 
   reset(){
-    this.playing = false; clearTimeout(this.timer);
+    this.playing = false; clearTimeout(this.timer); clearTimeout(this.halfTimer);
     this.idx = 0; this.animating = false;
     this.cubies = this.initCube();
     this.hideArrows();
@@ -420,6 +451,11 @@ class StageController{
 
   togglePlay(){
     if(this.idx >= this.moves.length){ this.reset(); this.playing = true; this.setPlayBtn('playing'); this.autoStep(); return; }
+    // Note: only this.timer (the "trigger next move" timer) is cleared here.
+    // this.halfTimer, if a double ("2") move is mid-pause between its two
+    // quarter-turns, is deliberately left to finish in the background — same
+    // as pausing mid-animation on any single move already does — so
+    // animating/idx bookkeeping always completes and never gets stuck.
     if(this.playing){ this.playing=false; clearTimeout(this.timer); this.setPlayBtn('idle'); this.statusEl.innerHTML = 'Paused'; return; }
     this.playing = true; this.setPlayBtn('playing');
     this.autoStep();
@@ -440,7 +476,7 @@ class StageController{
     this.stepForward(false);
     if(this.playing){
       clearTimeout(this.timer);
-      this.timer = setTimeout(()=>{ if(this.playing) this.autoStep(); }, totalMoveMs(this.duration(move)) + GAP_MS[this.speed]);
+      this.timer = setTimeout(()=>{ if(this.playing) this.autoStep(); }, this.moveTotalMs(move) + GAP_MS[this.speed]);
     }
   }
 
@@ -452,7 +488,7 @@ class StageController{
     this.highlightRow(this.idx);
     this.statusEl.innerHTML = `Move <b>${this.idx+1}/${this.moves.length}</b> — <b>${move}</b>`;
     this.animating = true;
-    animateMove(this.sceneEl, this.cubies, move, dur, ()=>{
+    this.playMove(move, dur, ()=>{
       this.animating = false;
       this.idx++;
       if(this.idx>=this.moves.length){
@@ -468,14 +504,14 @@ class StageController{
 
   stepBack(){
     if(this.animating || this.idx<=0) return;
-    this.playing=false; clearTimeout(this.timer); this.setPlayBtn('idle');
+    this.playing=false; clearTimeout(this.timer); clearTimeout(this.halfTimer); this.setPlayBtn('idle');
     const target = this.idx-1;
     this.jumpTo(target);
   }
 
   jumpTo(target){
     if(this.animating) return;
-    this.playing=false; clearTimeout(this.timer); this.setPlayBtn('idle');
+    this.playing=false; clearTimeout(this.timer); clearTimeout(this.halfTimer); this.setPlayBtn('idle');
     this.cubies = this.initCube();
     this.idx = 0;
     for(let i=0;i<target;i++){ applyMoveLogic(this.cubies, this.moves[i]); }
