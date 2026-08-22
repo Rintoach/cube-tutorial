@@ -1,0 +1,15 @@
+{
+  "name": "cube-tutorial",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rubik's Cube solving tutorial — static site (GitHub Pages) with a shared cube engine and finger-training practice page.",
+  "scripts": {
+    "test": "npm run test:engine && npm run test:e2e",
+    "test:engine": "node tests/engine.test.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0"
+  }
+}

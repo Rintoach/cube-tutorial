@@ -263,4 +263,7 @@ class Trainer{
   }
 }
 
-new Trainer();
+// Exposed for the Playwright E2E suite (tests/e2e/trainer.spec.js), the same
+// pattern script.js already uses for the main tutorial (window.__controllers).
+// Harmless in normal browser use — nothing else reads this global.
+window.__trainer = new Trainer();

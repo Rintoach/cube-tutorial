@@ -537,3 +537,15 @@ class StageController{
     else this.statusEl.innerHTML = `Ready — move <b>${target+1}/${this.moves.length}</b> next`;
   }
 }
+
+// Node/CommonJS export for the test harness (tests/engine.test.js). This
+// block never runs in the browser — `module` is undefined there — so it has
+// zero effect on the live site. Everything above this line is plain browser
+// JS with no top-level DOM access, which is what makes this safe to require().
+if(typeof module !== 'undefined' && module.exports){
+  module.exports = {
+    rotVec, parseMove, applyMoveLogic, makeCubies,
+    FACE_AXIS, FACE_ANGLE, FACE_LAYER, MOVE_VISUAL, ICON_GLYPH, FACE_INFO,
+    STAGES, SPEED_MS, GAP_MS, DOUBLE_PAUSE_MS, FINGER_TRICKS,
+  };
+}
