@@ -11,6 +11,63 @@
    double move never reads as one confusing fast spin.
    ===================================================================== */
 
+/* =====================================================================
+   HAND ICON — a small flat SVG hand (palm facing the viewer) used next to
+   the finger-cue text so "Middle finger" etc. is something you can see,
+   not just read. One shape is shared by both hands: a left hand is just
+   the same markup mirrored (scaleX(-1) in CSS), since a palm-forward left
+   hand IS a mirrored right hand. Whichever digit(s) the current move's
+   FINGER_TRICKS entry names get an "active" class for a color highlight.
+   ===================================================================== */
+const HAND_DIGIT_RECTS = {
+  pinky:  '<rect class="hd-digit hd-pinky"  x="18" y="28" width="11" height="32" rx="5.5"/>',
+  ring:   '<rect class="hd-digit hd-ring"   x="32" y="15" width="12" height="45" rx="6"/>',
+  middle: '<rect class="hd-digit hd-middle" x="46" y="8"  width="13" height="52" rx="6.5"/>',
+  index:  '<rect class="hd-digit hd-index"  x="61" y="16" width="12" height="44" rx="6"/>',
+};
+const HAND_THUMB = '<g transform="translate(80,92) rotate(35)"><rect class="hd-digit hd-thumb" x="-6" y="-7" width="13" height="32" rx="6.5"/></g>';
+
+// Reads a FINGER_TRICKS "finger" label (e.g. "Index / thumb", "Thumbs",
+// "Middle finger") and returns the set of digits it names. Matches by
+// plain substring, not exact strings, so it stays correct even if the
+// wording in cube-engine.js is tweaked later.
+function activeDigitsFor(fingerLabel){
+  const s = fingerLabel.toLowerCase();
+  const set = new Set();
+  if(s.includes('thumb')) set.add('thumb');
+  if(s.includes('index')) set.add('index');
+  if(s.includes('middle')) set.add('middle');
+  if(s.includes('ring')) set.add('ring');
+  if(s.includes('pinky')) set.add('pinky');
+  return set;
+}
+
+function handSVG(activeSet, mirrored){
+  const cls = 'hd-hand' + (mirrored ? ' hd-mirrored' : '');
+  const digits = ['pinky','ring','middle','index'].map(d => HAND_DIGIT_RECTS[d]).join('');
+  const mark = (name) => activeSet.has(name) ? ` hd-active-${name}` : '';
+  // classes are added on the wrapping <svg> (hd-active-thumb etc.) rather
+  // than string-substituted into each rect, so one template covers every
+  // combination without rebuilding the digit markup per move.
+  const activeClasses = ['thumb','index','middle','ring','pinky'].map(mark).join('');
+  return `<svg class="${cls}${activeClasses}" viewBox="0 0 100 130" aria-hidden="true">
+    <rect class="hd-palm" x="14" y="58" width="72" height="50" rx="22"/>
+    ${digits}
+    ${HAND_THUMB}
+  </svg>`;
+}
+
+// hand label from FINGER_TRICKS -> which icon(s) to show. "Both hands"
+// renders a mirrored pair (right + left) since two-hand moves like F/F'
+// use both thumbs together.
+function handIconsFor(handLabel, fingerLabel){
+  const active = activeDigitsFor(fingerLabel);
+  if(handLabel === 'Both hands'){
+    return `<div class="tr-hand-pair">${handSVG(active,false)}${handSVG(active,true)}</div>`;
+  }
+  return handSVG(active, handLabel === 'Left hand');
+}
+
 function stepsForAlg(alg){
   const steps = [];
   alg.split(' ').forEach(token=>{
@@ -189,7 +246,14 @@ class Trainer{
     this.moveBadgeEl.innerHTML = `Move ${this.idx+1} of ${this.steps.length} — <b>${step.move}</b>${partLabel}`;
     this.plainEl.textContent = v.plain;
     const trick = FINGER_TRICKS[step.move];
-    this.fingerEl.innerHTML = `<b>${trick.hand} · ${trick.finger}</b><span>${trick.cue}</span>`;
+    this.fingerEl.innerHTML = `
+      <div class="tr-finger-row">
+        <div class="tr-hand-icon">${handIconsFor(trick.hand, trick.finger)}</div>
+        <div class="tr-finger-copy">
+          <b>${trick.hand} · ${trick.finger}</b>
+          <span>${trick.cue}</span>
+        </div>
+      </div>`;
     this.showArrow(step.move, step.part ? `${step.move} (${step.part}/${step.of})` : step.move);
     this.resultEl.classList.remove('show');
     this.updateDots();

@@ -5,7 +5,7 @@
    ===================================================================== */
 
 .trainer-main{
-  width:min(1100px, calc(100% - 32px));
+  width:min(1360px, calc(100% - 32px));
   margin:0 auto;
   padding:28px 0 70px;
 }
@@ -71,14 +71,17 @@
 
 /* Big full-screen-feeling viewport. Reuses .cube-viewport/.cube-scene
    rendering from style.css — only the size + an extra CSS scale() change,
-   the JS positioning math (58px per unit) is untouched. */
+   the JS positioning math (58px per unit) is untouched.
+   Scale is deliberately more moderate than earlier (was 2.7) — that filled
+   the box edge-to-edge and read as cropped/zoomed rather than "big and
+   clear". This leaves visible margin on every side at any window size. */
 .trainer-viewport{
-  height:min(58vh, 560px);
-  min-height:320px;
+  height:min(52vh, 480px);
+  min-height:300px;
   border-radius:22px;
 }
 .trainer-viewport .cube-scene{
-  transform: scale(2.7) rotateX(-22deg) rotateY(32deg);
+  transform: scale(2.05) rotateX(-22deg) rotateY(32deg);
 }
 .trainer-viewport .arrow-glyph{ font-size:44px; }
 .trainer-viewport .move-badge{ font-size:13px; padding:4px 9px; }
@@ -94,6 +97,36 @@
 .tr-plain{ font-size:14.5px; color:var(--text-dim); margin-bottom:12px; }
 .tr-finger{ font-size:13.5px; color:#d8e2ee; line-height:1.5; }
 .tr-finger b{ display:block; color:#fff; margin-bottom:4px; font-size:13.5px; }
+
+/* ---- hand/finger icon ---- */
+.tr-finger-row{ display:flex; align-items:flex-start; gap:14px; }
+.tr-hand-icon{ flex-shrink:0; display:flex; align-items:center; }
+.tr-finger-copy{ min-width:0; }
+.tr-finger-copy b{ display:block; color:#fff; margin-bottom:4px; font-size:13.5px; }
+
+/* One hand icon by default; "Both hands" moves (F/F') render a mirrored
+   pair via .tr-hand-pair instead, sized down a little so the pair doesn't
+   dominate the readout panel. */
+.hd-hand{ width:52px; height:auto; overflow:visible; }
+.tr-hand-pair{ display:flex; gap:6px; }
+.tr-hand-pair .hd-hand{ width:38px; }
+
+.hd-hand.hd-mirrored{ transform:scaleX(-1); }
+
+.hd-palm{ fill:#2a3c52; stroke:#4a6684; stroke-width:2; }
+.hd-digit{ fill:#2a3c52; stroke:#4a6684; stroke-width:2; }
+
+/* Highlighting is driven by a class on the <svg> itself (hd-active-thumb,
+   hd-active-index, ...) rather than per-rect, so handSVG()'s markup never
+   has to change shape between moves — only which of these classes apply. */
+.hd-hand.hd-active-thumb  .hd-thumb,
+.hd-hand.hd-active-index  .hd-index,
+.hd-hand.hd-active-middle .hd-middle,
+.hd-hand.hd-active-ring   .hd-ring,
+.hd-hand.hd-active-pinky  .hd-pinky{
+  fill:var(--accent);
+  stroke:var(--accent);
+}
 
 /* ---- sidebar ---- */
 .trainer-side{ display:flex; flex-direction:column; gap:16px; }
@@ -151,6 +184,6 @@
 .trainer-disclaimer strong{ color:#fff; }
 
 @media(max-width:720px){
-  .trainer-viewport{ height:min(48vh, 420px); }
-  .trainer-viewport .cube-scene{ transform: scale(2.1) rotateX(-22deg) rotateY(32deg); }
+  .trainer-viewport{ height:min(44vh, 380px); }
+  .trainer-viewport .cube-scene{ transform: scale(1.7) rotateX(-22deg) rotateY(32deg); }
 }
