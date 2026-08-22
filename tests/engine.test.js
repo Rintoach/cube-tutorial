@@ -73,18 +73,73 @@ test('U2 parses as a 180° turn regardless of any prime', () => {
   assert.strictEqual(parseMove('U2').angle, 180);
 });
 
-console.log('\n=== every STAGES entry: before + alg returns to a clean solved (or solved-flipped) state ===');
-STAGES.forEach((data, i) => {
-  test(`Stage ${i+1} (${data.title}): before + alg -> clean solved`, () => {
-    let cubies = makeCubies();
-    if(data.flip) flipX(cubies);
-    const reference = clone(cubies); // this stage's "solved" reference (flipped or not)
-    (data.before || []).forEach(m => applyMoveLogic(cubies, m));
-    data.alg.split(' ').forEach(m => applyMoveLogic(cubies, m));
-    assert.ok(statesEqual(cubies, reference),
-      `alg "${data.alg}" run after before "${(data.before||[]).join(' ')}" did not return to the stage's own solved reference`);
-  });
+console.log('\n=== stage goal predicates (identity-free: check whichever piece currently sits in each slot) ===');
+/* -----------------------------------------------------------------------
+   Each demo must end with ONLY that stage's own goal achieved — not a
+   fully-solved cube regardless of stage. A stage whose "before" is just
+   invert(alg) trivially cancels back to solved once alg runs, which is
+   pedagogically misleading (Stage 3's demo, say, would "solve" the whole
+   cube rather than just the second layer). Rule: Stages 1-6 must reach
+   their own goal AND must NOT be fully solved; Stage 7 must be fully
+   solved. See tests/e2e/content.spec.js for the matching UI-level checks.
+   ----------------------------------------------------------------------- */
+function keyOf(pos){ return pos.map(Math.round).join(','); }
+function pieceAt(cubies, posKey){ return cubies.find(c => keyOf(c.pos) === posKey); }
+function stickerColor(cubie, normalKey){
+  const s = cubie.stickers.find(s => keyOf(s.normal) === normalKey);
+  return s ? s.color : null;
+}
+// `ref` is this stage's own solved reference (flipped first if data.flip) — never the
+// plain unflipped makeCubies(), or Stage 7 (which flips the whole cube) would compare
+// against the wrong orientation and every piece would look "wrong".
+function matchesSolved(cubie, posKey, ref){
+  const refPiece = pieceAt(ref, posKey);
+  return cubie.stickers.every(s => refPiece.stickers.some(rs => keyOf(rs.normal)===keyOf(s.normal) && rs.color===s.color));
+}
+const D_EDGE_IDS = ['0,-1,1','0,-1,-1','1,-1,0','-1,-1,0'];
+const D_CORNER_IDS = ['1,-1,1','1,-1,-1','-1,-1,1','-1,-1,-1'];
+const M_EDGE_IDS = ['1,0,1','1,0,-1','-1,0,1','-1,0,-1'];
+const U_EDGE_IDS = ['0,1,1','0,1,-1','1,1,0','-1,1,0'];
+const U_CORNER_IDS = ['1,1,1','1,1,-1','-1,1,1','-1,1,-1'];
 
+function isFullySolved(cubies, ref){
+  return cubies.every(c => matchesSolved(c, keyOf(c.pos), ref));
+}
+function whiteCrossDone(cubies, ref){
+  return D_EDGE_IDS.every(id => matchesSolved(pieceAt(cubies, id), id, ref));
+}
+function firstLayerDone(cubies, ref){
+  if(!whiteCrossDone(cubies, ref)) return false;
+  return D_CORNER_IDS.every(id => matchesSolved(pieceAt(cubies, id), id, ref));
+}
+function secondLayerDone(cubies, ref){
+  if(!firstLayerDone(cubies, ref)) return false;
+  return M_EDGE_IDS.every(id => matchesSolved(pieceAt(cubies, id), id, ref));
+}
+function yellowCrossDoneStrict(cubies, ref){
+  if(!secondLayerDone(cubies, ref)) return false;
+  return U_EDGE_IDS.every(id => stickerColor(pieceAt(cubies, id), '0,1,0') === 'yellow');
+}
+function topEdgesMatched(cubies, ref){
+  if(!yellowCrossDoneStrict(cubies, ref)) return false;
+  return U_EDGE_IDS.every(id => matchesSolved(pieceAt(cubies, id), id, ref));
+}
+function topCornersPositioned(cubies, ref){
+  if(!topEdgesMatched(cubies, ref)) return false;
+  return U_CORNER_IDS.every(id => {
+    const occ = pieceAt(cubies, id);
+    const nonYellowHere = new Set(occ.stickers.filter(s=>s.color!=='yellow').map(s=>s.color));
+    const refPiece = pieceAt(ref, id);
+    const expected = new Set(refPiece.stickers.filter(s=>s.color!=='yellow').map(s=>s.color));
+    if(nonYellowHere.size !== expected.size) return false;
+    for(const c of nonYellowHere) if(!expected.has(c)) return false;
+    return true;
+  });
+}
+const STAGE_GOALS = [whiteCrossDone, firstLayerDone, secondLayerDone, yellowCrossDoneStrict, topEdgesMatched, topCornersPositioned];
+
+console.log('\n=== every STAGES entry: before + alg reaches that stage\'s own goal, not a fully-solved cube (except Stage 7) ===');
+STAGES.forEach((data, i) => {
   test(`Stage ${i+1} (${data.title}): "before" is a genuine scramble (not already solved)`, () => {
     let cubies = makeCubies();
     if(data.flip) flipX(cubies);
@@ -94,6 +149,34 @@ STAGES.forEach((data, i) => {
       assert.ok(!statesEqual(cubies, reference), 'before-scramble left the cube already solved — demo would open on a solved cube');
     }
   });
+
+  if(i < 6){
+    test(`Stage ${i+1} (${data.title}): before + alg meets this stage's own goal`, () => {
+      let cubies = makeCubies();
+      if(data.flip) flipX(cubies);
+      const ref = clone(cubies);
+      (data.before || []).forEach(m => applyMoveLogic(cubies, m));
+      data.alg.split(' ').forEach(m => applyMoveLogic(cubies, m));
+      assert.ok(STAGE_GOALS[i](cubies, ref), `alg "${data.alg}" run after before "${(data.before||[]).join(' ')}" did not reach this stage's own goal`);
+    });
+    test(`Stage ${i+1} (${data.title}): before + alg does NOT end fully solved`, () => {
+      let cubies = makeCubies();
+      if(data.flip) flipX(cubies);
+      const ref = clone(cubies);
+      (data.before || []).forEach(m => applyMoveLogic(cubies, m));
+      data.alg.split(' ').forEach(m => applyMoveLogic(cubies, m));
+      assert.ok(!isFullySolved(cubies, ref), 'demo ended on a fully-solved cube — beginners would think this one stage solved everything');
+    });
+  } else {
+    test(`Stage ${i+1} (${data.title}): before + alg -> fully solved`, () => {
+      let cubies = makeCubies();
+      if(data.flip) flipX(cubies);
+      const ref = clone(cubies);
+      (data.before || []).forEach(m => applyMoveLogic(cubies, m));
+      data.alg.split(' ').forEach(m => applyMoveLogic(cubies, m));
+      assert.ok(isFullySolved(cubies, ref), 'Stage 7 (the final stage) must end on a fully-solved cube');
+    });
+  }
 });
 
 console.log('\n=== "2" moves: verify a bare face applied twice == the "2" move applied once ===');
