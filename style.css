@@ -435,6 +435,20 @@
   .case-title{ font-weight:700; color:#fff; margin-bottom:4px; }
   .case-body code{ font-family:var(--font-mono); background:rgba(255,255,255,.08); padding:1px 6px; border-radius:5px; }
 
+  /* ---- stage-completion checkpoint (always visible, not collapsible —
+     this is a gate to pass before moving on, not optional extra reading) ---- */
+  .checklist-box{
+    margin-top:12px;
+    background:var(--good-soft);
+    border-left:3.5px solid var(--good);
+    padding:12px 16px;
+    border-radius:0 10px 10px 0;
+  }
+  .checklist-head{ font-size:13.5px; font-weight:700; color:#fff; margin-bottom:6px; }
+  .checklist-list{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:5px; }
+  .checklist-list li{ font-size:13.2px; color:#cdf5e6; line-height:1.5; padding-left:22px; position:relative; }
+  .checklist-list li::before{ content:'✓'; position:absolute; left:0; color:var(--good); font-weight:700; }
+
   /* ============ FINGER TRICKS ============ */
   .ft-intro{ font-size:13.8px; color:var(--text-dim); margin:0 0 18px; max-width:72ch; }
   .ft-drill{

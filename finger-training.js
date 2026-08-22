@@ -114,6 +114,8 @@ class Trainer{
     this.resultEl = document.getElementById('trainerResult');
     this.goalEl = document.getElementById('tiGoal');
     this.holdEl = document.getElementById('tiHold');
+    this.casesBoxEl = document.getElementById('tiCasesBox');
+    this.casesListEl = document.getElementById('tiCasesList');
     this.playBtn = document.querySelector('[data-act="trplay"]');
     this.arrows = {
       top: this.viewportEl.querySelector('.move-arrow.pos-top'),
@@ -228,6 +230,19 @@ class Trainer{
     this.goalEl.textContent = this.data.desc;
     this.holdEl.innerHTML = this.data.hold || '—';
     this.resultEl.classList.remove('show');
+
+    // Reuse the same "other starting cases" help the main tutorial shows —
+    // the trainer used to hide this entirely, leaving practice-mode users
+    // with no guidance when their cube didn't match the demo setup.
+    if(this.data.cases && this.data.cases.length){
+      this.casesBoxEl.style.display = '';
+      this.casesBoxEl.open = false;
+      this.casesListEl.innerHTML = this.data.cases.map(c =>
+        `<div class="case-item"><div class="case-title">${c.title}</div><div class="case-body">${c.body}</div></div>`
+      ).join('');
+    } else {
+      this.casesBoxEl.style.display = 'none';
+    }
 
     this.buildProgressDots();
     this.rebuildCube();
