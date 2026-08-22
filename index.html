@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Cube Solve Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav class="stepnav">
+    <div class="stepnav-inner">
+      <div class="stepnav-brand"><span class="dot"></span>CUBE CONSOLE</div>
+      <div class="steppills" id="steppills"></div>
+      <a class="ft-pill" href="#fingertricks">&#9995; Finger tricks</a>
+      <div class="stepnav-speed">
+        <span>SPEED</span>
+        <div class="speed-opts" id="globalSpeedOpts">
+          <button class="speed-opt" data-speed="slow">Slow</button>
+          <button class="speed-opt active" data-speed="normal">Normal</button>
+          <button class="speed-opt" data-speed="fast">Fast</button>
+        </div>
+      </div>
+      <div class="stepnav-progress" id="stepProgress"><b>0</b>/7 completed</div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap">
+      <span class="badge">● Beginner Method · 7 Stages</span>
+      <h1 class="title">Solve the Cube, <span>One Layer at a Time</span></h1>
+      <p class="hero-sub">A corrected, slow-motion 3D turn engine — step through every algorithm move‑by‑move, watch exactly which layer turns, and replay it as many times as you need.</p>
+      <div class="hero-stage">
+        <div class="hero-cube-box">
+          <div class="cube-scene hero-spin" id="heroCube"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section class="legend">
+      <div class="legend-top"><span class="icon">◈</span><h2>How to read the moves</h2></div>
+      <div class="legend-grid" id="legendGrid"></div>
+      <div class="legend-rules">
+        <div class="rule-chip"><span class="tag">LETTER</span><span>Each letter is a face: <b>F</b>ront, <b>B</b>ack, <b>U</b>p, <b>D</b>own, <b>L</b>eft, <b>R</b>ight. Turn only that layer 90°, clockwise as you look straight at it.</span></div>
+        <div class="rule-chip"><span class="tag">PRIME</span><span>A letter with an apostrophe, like <code>R'</code>, means turn that same layer counter‑clockwise instead.</span></div>
+        <div class="rule-chip"><span class="tag">2</span><span>A letter followed by <code>2</code>, like <code>U2</code>, means turn that layer a full 180° — direction doesn't matter.</span></div>
+        <div class="rule-chip"><span class="tag">ORDER</span><span>Moves always run left‑to‑right. Never skip one or do them out of sequence — each step sets up the next.</span></div>
+      </div>
+    </section>
+
+    <section class="legend" id="cubebasics">
+      <div class="legend-top"><span class="icon">◆</span><h2>Before You Start — Cube Basics</h2></div>
+      <div class="legend-rules">
+        <div class="rule-chip"><span class="tag">PIECES</span><span>A cube has three kinds of piece. <b>Centers</b> (1 sticker) never move relative to each other and tell you what color each side must become. <b>Edges</b> (2 stickers) sit between two centers. <b>Corners</b> (3 stickers) sit at the corners. You'll only ever be moving edges and corners — the centers are your fixed map.</span></div>
+        <div class="rule-chip"><span class="tag">DEFAULT HOLD</span><span>Unless a stage says otherwise, hold the cube with <b>white on the bottom, yellow on top</b>, and keep it that way — don't spin the whole cube around to "get a better angle" mid-stage, or you'll lose track of which layer is which.</span></div>
+        <div class="rule-chip"><span class="tag">TWO HANDS, ONE JOB</span><span>One hand anchors the cube and barely moves. The other hand (or its thumb/index finger) does the actual turning. If both hands are moving at once, you've probably rotated the whole cube by accident.</span></div>
+        <div class="rule-chip"><span class="tag">DON'T FORCE IT</span><span>If a stage's starting picture doesn't look like your cube, that's fine — it's just one example case. Re-read the "Hold it like this" box, match your cube's actual pattern to it as closely as you can, and the same moves will still get you there.</span></div>
+      </div>
+    </section>
+
+    <div id="stages"></div>
+
+    <section class="legend" id="fingertricks">
+      <div class="legend-top"><span class="icon">&#9995;</span><h2>Finger Tricks — Turn Faster Without Regripping</h2></div>
+      <p class="ft-intro">Once you can execute every stage above without checking the sequence, speed stops being about knowing the moves and starts being about how your fingers make them. Try each move on the practice cube below, then use the reference grid any time you want a reminder — grips vary a bit from person to person, so treat these as a solid starting point rather than a strict rule.</p>
+      <div class="ft-drill">
+        <div class="cube-viewport" id="ftViewport">
+          <div class="cube-scene" id="ftScene"></div>
+          <div class="move-arrow pos-top"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+          <div class="move-arrow pos-bottom"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+          <div class="move-arrow pos-left"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+          <div class="move-arrow pos-right"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+          <div class="move-arrow pos-center"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
+        </div>
+        <div class="ft-drill-side">
+          <div class="ft-movebtns" id="ftButtons"></div>
+          <div class="ft-caption" id="ftCaption">Tap a move above to see the recommended fingertrick and watch it played on the cube.</div>
+          <button class="tbtn" id="ftReset">&#8635; Reset practice cube</button>
+        </div>
+      </div>
+      <div class="ft-grid" id="ftGrid"></div>
+      <div class="legend-rules" style="margin-top:12px;">
+        <div class="rule-chip"><span class="tag">GRIP</span><span>Hold the cube loosely with fingertips near chest height, not in your palms — a tight grip is the single biggest speed killer.</span></div>
+        <div class="rule-chip"><span class="tag">NO REGRIP</span><span>Try to trigger the next move without letting go of the cube between turns. That habit alone is most of what "speed" actually is.</span></div>
+        <div class="rule-chip"><span class="tag">LOOK AHEAD</span><span>While your hands finish the current move, your eyes should already be searching for the next piece.</span></div>
+        <div class="rule-chip"><span class="tag">SLOW &#8594; FAST</span><span>Drill a new algorithm slowly with clean fingertricks first. Speed comes from repetition, never from rushing early.</span></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>Practice each stage until it feels automatic before moving to the next — muscle memory beats memorizing.</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
