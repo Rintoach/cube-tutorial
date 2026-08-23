@@ -3,11 +3,11 @@ const { test, expect } = require('@playwright/test');
 
 /* =====================================================================
    localStorage persistence — speed choice and completed-stage progress
-   should survive a reload. Completion is driven directly via jumpTo() on
-   the exposed controller (see script.js's window.__controllers) rather
-   than waiting out a real animation — this suite is testing the SAVE/
-   RESTORE behavior, not move-by-move animation, so there's no need to
-   sit through it.
+   should survive a reload. Completion is driven by checking the "My cube
+   matches this goal" confirm checkbox (see cube-engine.js's markComplete/
+   unmarkComplete) rather than by the demo sequence finishing — finishing
+   the demo only proves the animation reached the goal, not the learner's
+   own physical cube, so it no longer marks a stage done by itself.
    ===================================================================== */
 
 test.describe('Main tutorial — saved speed + progress', () => {
@@ -22,20 +22,44 @@ test.describe('Main tutorial — saved speed + progress', () => {
     expect(speed).toBe('medium');
   });
 
-  test('completed stage persists across reload', async ({ page }) => {
+  test('finishing the demo alone does NOT mark a stage complete', async ({ page }) => {
     await page.goto('/index.html');
     await expect(page.locator('#stepProgress')).toContainText('0');
 
     await page.evaluate(() => {
       const c = window.__controllers[0];
-      c.jumpTo(c.moves.length); // instantly marks stage 1 complete, no animation wait
+      c.jumpTo(c.moves.length); // demo reaches "Sequence complete" — no animation wait
     });
+    const stage1 = page.locator('#stage-1');
+    await expect(stage1.locator('.status-line')).toContainText('Sequence complete');
+    await expect(page.locator('#pill-0')).not.toHaveClass(/done/);
+    await expect(page.locator('#stepProgress')).toContainText('0');
+  });
+
+  test('checking "My cube matches this goal" marks the stage complete and persists', async ({ page }) => {
+    await page.goto('/index.html');
+    const confirmCheck = page.locator('#stage-1 .confirm-check');
+    await confirmCheck.check();
+
     await expect(page.locator('#pill-0')).toHaveClass(/done/);
     await expect(page.locator('#stepProgress')).toContainText('1');
 
     await page.reload();
     await expect(page.locator('#pill-0')).toHaveClass(/done/);
     await expect(page.locator('#stepProgress')).toContainText('1');
+    // the checkbox itself should restore checked too, not just the pill
+    await expect(page.locator('#stage-1 .confirm-check')).toBeChecked();
+  });
+
+  test('unchecking the confirm box un-marks the stage', async ({ page }) => {
+    await page.goto('/index.html');
+    const confirmCheck = page.locator('#stage-1 .confirm-check');
+    await confirmCheck.check();
+    await expect(page.locator('#pill-0')).toHaveClass(/done/);
+
+    await confirmCheck.uncheck();
+    await expect(page.locator('#pill-0')).not.toHaveClass(/done/);
+    await expect(page.locator('#stepProgress')).toContainText('0');
   });
 });
 

@@ -569,6 +569,10 @@ class StageController{
         <ul class="checklist-list">
           ${this.data.checklist.map(item => `<li>${item}</li>`).join('')}
         </ul>
+        <label class="confirm-row">
+          <input type="checkbox" class="confirm-check" ${this.done ? 'checked' : ''}>
+          <span>My cube matches this goal — mark Stage ${this.index+1} complete</span>
+        </label>
       </div>` : ''}
     `;
 
@@ -576,6 +580,7 @@ class StageController{
     this.playBtn = this.el.querySelector('[data-act="play"]');
     this.statusEl = this.el.querySelector('.status-line');
     this.numEl = this.el.querySelector('.stage-num');
+    this.confirmCheckEl = this.el.querySelector('.confirm-check');
     this.arrows = {
       top: this.el.querySelector('.move-arrow.pos-top'),
       bottom: this.el.querySelector('.move-arrow.pos-bottom'),
@@ -639,6 +644,12 @@ class StageController{
         this.selectVariant(parseInt(btn.dataset.variant,10));
       });
     });
+    if(this.confirmCheckEl){
+      this.confirmCheckEl.addEventListener('change', ()=>{
+        if(this.confirmCheckEl.checked) this.markComplete();
+        else this.unmarkComplete();
+      });
+    }
   }
 
   // Every quarter-turn (half of a "2" move included) plays at the same
@@ -686,6 +697,17 @@ class StageController{
     if(this.done) return;
     this.done = true;
     this.numEl.classList.add('done');
+    if(this.confirmCheckEl) this.confirmCheckEl.checked = true;
+    updateProgress();
+  }
+
+  // The other half of the manual confirmation: unchecking "My cube matches
+  // this goal" un-marks the stage, in case it was checked by mistake.
+  unmarkComplete(){
+    if(!this.done) return;
+    this.done = false;
+    this.numEl.classList.remove('done');
+    if(this.confirmCheckEl) this.confirmCheckEl.checked = false;
     updateProgress();
   }
 
@@ -746,7 +768,10 @@ class StageController{
     if(this.idx >= this.moves.length){
       this.playing=false; clearTimeout(this.timer);
       this.setPlayBtn('done'); this.hideArrows(); this.statusEl.innerHTML = '<b>Sequence complete</b>';
-      this.markComplete();
+      // Finishing the demo does NOT mark the stage complete on its own — it
+      // only proves the animation reached the goal, not that the learner's
+      // own physical cube did. Completion is confirmed manually via the
+      // "My cube matches this goal" checkbox in the checklist box below.
       return;
     }
     const move = this.moves[this.idx];
@@ -772,7 +797,8 @@ class StageController{
         this.hideArrows(); this.highlightRow(this.idx);
         this.statusEl.innerHTML = '<b>Sequence complete</b>';
         this.setPlayBtn('done'); this.playing=false; clearTimeout(this.timer);
-        this.markComplete();
+        // See autoStep() above — the demo finishing doesn't mark the stage
+        // done; only the manual "My cube matches this goal" checkbox does.
       } else if(manual){
         this.hideArrows();
       }
@@ -796,7 +822,7 @@ class StageController{
     this.idx = target;
     this.hideArrows();
     this.highlightRow(target-1);
-    if(target>=this.moves.length){ this.statusEl.innerHTML = '<b>Sequence complete</b>'; this.setPlayBtn('done'); this.markComplete(); }
+    if(target>=this.moves.length){ this.statusEl.innerHTML = '<b>Sequence complete</b>'; this.setPlayBtn('done'); }
     else this.statusEl.innerHTML = `Ready — move <b>${target+1}/${this.moves.length}</b> next`;
   }
 }
