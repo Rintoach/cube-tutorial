@@ -317,6 +317,12 @@ const STAGE7_DIAGRAM = `
     </figure>
   </div>`;
 
+// Shared label for the numbered per-corner workflow box (Stage 7) — kept as
+// one constant, not duplicated between cube-engine.js's render() and
+// finger-training.js's stage-load code, so it only needs translating once
+// whenever this site adds languages.
+const WORKFLOW_HEAD_LABEL = "Repeat for each corner:";
+
 const STAGES = [
   { title:"White Cross", desc:"Solve the four white edges around the bottom center, matching each edge's side color to its center.",
     alg:"F2 R2", before:"R2 F2 F D' F' D".split(' '),
@@ -511,7 +517,7 @@ class StageController{
       ${this.activeDiagram() || ''}
       ${this.activeWorkflow() && this.activeWorkflow().length ? `
       <div class="workflow-box">
-        <div class="workflow-head">Repeat for each corner:</div>
+        <div class="workflow-head">${WORKFLOW_HEAD_LABEL}</div>
         <ol class="workflow-list">
           ${this.activeWorkflow().map(step => `<li>${step}</li>`).join('')}
         </ol>
@@ -770,7 +776,7 @@ if(typeof module !== 'undefined' && module.exports){
   module.exports = {
     rotVec, parseMove, applyMoveLogic, makeCubies,
     FACE_AXIS, FACE_ANGLE, FACE_LAYER, MOVE_VISUAL, ICON_GLYPH, FACE_INFO,
-    STAGES, SPEED_MS, GAP_MS, DOUBLE_PAUSE_MS, FINGER_TRICKS,
+    STAGES, SPEED_MS, GAP_MS, DOUBLE_PAUSE_MS, FINGER_TRICKS, WORKFLOW_HEAD_LABEL,
     prefersReducedMotion, motionTimings, totalMoveMs,
   };
 }

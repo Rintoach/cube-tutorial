@@ -264,7 +264,7 @@ class Trainer{
       this.workflowEl.style.display = '';
       this.workflowEl.innerHTML = `
         <div class="workflow-box">
-          <div class="workflow-head">Repeat for each corner:</div>
+          <div class="workflow-head">${WORKFLOW_HEAD_LABEL}</div>
           <ol class="workflow-list">${this.data.workflow.map(s => `<li>${s}</li>`).join('')}</ol>
         </div>`;
     } else {
