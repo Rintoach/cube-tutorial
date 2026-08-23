@@ -82,4 +82,13 @@ test.describe('Impossible-cube help card', () => {
     await expect(section).toContainText(/one twisted corner/i);
     await expect(section).toContainText(/one swapped pair/i);
   });
+
+  test('gives a concrete, non-vague recovery instruction (not just "keep trying")', async ({ page }) => {
+    await page.goto('/index.html');
+    const section = page.locator('#impossiblecube');
+    await expect(section).toContainText(/how to recover/i);
+    // must name an actual physical fix, not just tell the learner to keep going
+    await expect(section).toContainText(/(pry|pop|push it (back|straight) in)/i);
+    await expect(section).toContainText(/restart this tutorial/i);
+  });
 });
