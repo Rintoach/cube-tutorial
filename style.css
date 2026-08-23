@@ -184,6 +184,24 @@
   }
   @media(max-width:720px){ .legend-grid{ grid-template-columns:repeat(3,1fr);} .legend-rules{ grid-template-columns:1fr; } }
 
+  /* ---- "Help if you're stuck" — the impossible-cube card, collapsed by
+     default and placed after all seven lessons. A first-time solver
+     shouldn't meet "your cube might be physically broken" before Stage 1;
+     it's still easy to find once someone's actually stuck. ---- */
+  .help-stuck summary{
+    cursor:pointer; list-style:none;
+    display:flex; align-items:center; gap:10px;
+  }
+  .help-stuck summary h2{ font-size:16px; margin:0; }
+  .help-stuck summary .icon{ color:var(--warn); font-size:18px; }
+  .help-stuck summary::after{
+    content:'▸'; margin-left:auto; color:var(--text-faint); font-size:13px;
+    transition:transform .15s ease;
+  }
+  .help-stuck[open] summary::after{ transform:rotate(90deg); }
+  .help-stuck summary::-webkit-details-marker{ display:none; }
+  .help-stuck[open] summary{ margin-bottom:16px; }
+
   /* ============ STAGE CARD ============ */
   .stage{
     background:var(--surface);
