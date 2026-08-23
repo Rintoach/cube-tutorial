@@ -47,7 +47,7 @@ test.describe('Stage 7 — hold/turn diagram and corner workflow', () => {
     await expect(page.locator('#tiDiagram .edge-diagram-row')).toBeVisible();
     await expect(page.locator('#tiWorkflow .workflow-list li')).toHaveCount(5);
 
-    await page.locator('.tr-stage-btn', { hasText: 'White Cross' }).click();
+    await page.locator('.tr-stage-btn', { hasText: 'White Corners' }).click();
     await expect(page.locator('#tiDiagram')).toBeHidden();
     await expect(page.locator('#tiWorkflow')).toBeHidden();
   });

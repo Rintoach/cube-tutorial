@@ -323,10 +323,24 @@ const STAGE7_DIAGRAM = `
 // whenever this site adds languages.
 const WORKFLOW_HEAD_LABEL = "Repeat for each corner:";
 
+// Stage 1's daisy-method target diagram, reusing the same top-view tab
+// layout as Stage 5's edgeMatchDiagram — here each tab marks "this edge is
+// up in the top layer, white facing up" (a completed petal) rather than
+// "this edge matches its center." The recurring beginner failure isn't the
+// freeing move, it's not knowing what a finished daisy is actually supposed
+// to look like, so showing an in-progress vs. complete pair matters more
+// here than for any other stage.
+const STAGE1_DIAGRAMS = `
+  <div class="edge-diagram-row">
+    ${edgeMatchDiagram(new Set(['back','right']), 'Daisy in progress — two petals placed, two white edges still buried or facing sideways')}
+    ${edgeMatchDiagram(new Set(['front','back','left','right']), 'Complete daisy — all four white edges up in the top layer, petals facing straight up around yellow')}
+  </div>`;
+
 const STAGES = [
   { title:"White Cross", desc:"Solve the four white edges around the bottom center, matching each edge's side color to its center.",
     alg:"F2 R2", before:"R2 F2 F D' F' D".split(' '),
     hold:"Hold the cube with white on the bottom and yellow on top — this is the orientation you'll keep all the way through Stage 6. The demo starts from a scrambled cross on purpose so you can see edges being placed, not just admired.",
+    diagramHTML: STAGE1_DIAGRAMS,
     tip:'This stage is two habits, not one algorithm. <strong>First, build a daisy:</strong> find all four white edges, wherever they currently are, and bring each one up into the top layer so its white sticker points straight up — sitting next to the yellow center like the petals of a daisy. <strong>Then insert each petal:</strong> turn the top layer (<code>U</code>) until a petal\'s outer color lines up with its matching center below, then spin that face <code>180°</code> — the white edge flips down into the cross. Repeat for the other three petals in any order; inserting one never disturbs the others already placed.',
     cases:[
       { title:"A white edge is buried in the middle layer, or sitting in the bottom layer but not matching its center", body:"Turn whichever face is <em>not</em> showing the white sticker — this frees the edge without a fixed sequence to memorize. It may take one or two turns of that face before white ends up facing up in the top layer. If it lands in the top layer with white facing sideways instead of up, give that same face one more quarter turn to pop it into a proper petal." },

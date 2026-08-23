@@ -34,7 +34,7 @@ test.describe('Stage 5 — edge-match diagnosis diagram', () => {
     await page.goto('/finger-training.html?stage=5');
     await expect(page.locator('#tiDiagram .edge-diagram-row')).toBeVisible();
 
-    await page.locator('.tr-stage-btn', { hasText: 'White Cross' }).click();
+    await page.locator('.tr-stage-btn', { hasText: 'White Corners' }).click();
     await expect(page.locator('#tiDiagram')).toBeHidden();
   });
 });
