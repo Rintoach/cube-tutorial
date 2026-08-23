@@ -177,6 +177,30 @@ STAGES.forEach((data, i) => {
       assert.ok(isFullySolved(cubies, ref), 'Stage 7 (the final stage) must end on a fully-solved cube');
     });
   }
+
+  // A stage's alternate starting cases (e.g. Stage 3's insert-left, played
+  // via the "Starting case" picker) must independently satisfy the exact
+  // same rule as the stage's own default: reach this stage's goal without
+  // ending fully solved. Nothing about the picker UI should let a variant
+  // skip this validation.
+  (data.variants || []).forEach(variant => {
+    test(`Stage ${i+1} variant "${variant.key}" (${variant.label}): before + alg meets this stage's own goal, not fully solved`, () => {
+      let cubies = makeCubies();
+      if(data.flip) flipX(cubies);
+      const ref = clone(cubies);
+      (variant.before || []).forEach(m => applyMoveLogic(cubies, m));
+      variant.alg.split(' ').forEach(m => applyMoveLogic(cubies, m));
+      assert.ok(STAGE_GOALS[i](cubies, ref), `variant "${variant.key}": alg "${variant.alg}" run after before "${(variant.before||[]).join(' ')}" did not reach this stage's own goal`);
+      assert.ok(!isFullySolved(cubies, ref), `variant "${variant.key}" ended on a fully-solved cube`);
+    });
+    test(`Stage ${i+1} variant "${variant.key}": "before" is a genuine scramble (not already solved)`, () => {
+      let cubies = makeCubies();
+      if(data.flip) flipX(cubies);
+      const reference = clone(cubies);
+      (variant.before || []).forEach(m => applyMoveLogic(cubies, m));
+      assert.ok(!statesEqual(cubies, reference), `variant "${variant.key}" before-scramble left the cube already solved`);
+    });
+  });
 });
 
 console.log('\n=== "2" moves: verify a bare face applied twice == the "2" move applied once ===');

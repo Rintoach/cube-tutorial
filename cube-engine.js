@@ -256,8 +256,18 @@ const STAGES = [
     alg:"U R U' R' U' F' U F", before:"F' U' F U R U R' U' R U' L' U R' U' L U".split(' '),
     hold:"White layer stays on the bottom, untouched, for this whole stage. Hold the cube with the target edge's slot at the front-right.",
     tip:'Match the edge\'s front-facing color to the center below it, then run the full formula to insert it to the right.',
+    variants:[
+      { key:'right', label:'Insert right (default)',
+        alg:"U R U' R' U' F' U F", before:"F' U' F U R U R' U' R U' L' U R' U' L U".split(' '),
+        hold:"White layer stays on the bottom, untouched, for this whole stage. Hold the cube with the target edge's slot at the front-right.",
+        tip:'Match the edge\'s front-facing color to the center below it, then run the full formula to insert it to the right.' },
+      { key:'left', label:'Insert left',
+        alg:"U' L' U L U F U' F'", before:"F U F' U' L' U' L U R U' L' U R' U' L U".split(' '),
+        hold:"White layer stays on the bottom, untouched, for this whole stage. Hold the cube with the target edge's slot at the front-<strong>left</strong> this time — the mirror image of the default case.",
+        tip:'Same idea as the right-insert trigger, mirrored: match the edge\'s front-facing color to the center below it, then run the full formula to insert it to the left.' },
+    ],
     cases:[
-      { title:"The edge needs to go left instead of right", body:'Use the mirror algorithm instead: <code>U\' L\' U L U F U\' F\'</code> — same idea, opposite side. Match the edge\'s front-facing color to the center below it, then run this to insert it to the left.' },
+      { title:"The edge needs to go left instead of right", body:'Use the mirror algorithm instead: <code>U\' L\' U L U F U\' F\'</code> — same idea, opposite side. Match the edge\'s front-facing color to the center below it, then run this to insert it to the left. Pick "Insert left" above to watch it played out.' },
       { title:"No non-yellow edge is anywhere in the top layer", body:'A common stuck point — it means a wrong edge is already sitting in one of the middle slots. Run either insertion algorithm once (right or left, whichever slot is currently wrong) to eject that edge back up into the top layer, then insert it correctly using the matching algorithm above.' },
     ],
     checklist:["White face still complete — no corners knocked loose while inserting edges", "Middle row has no yellow stickers showing on any side face", "Side colors match their centers on all four side faces, in both the top two rows"] },
@@ -327,7 +337,8 @@ class StageController{
     this.el = stageEl;
     this.data = data;
     this.index = index;
-    this.moves = data.alg.split(' ');
+    this.variantIdx = 0;
+    this.moves = this.activeAlg().split(' ');
     this.idx = 0;
     this.playing = false;
     this.animating = false;
@@ -335,6 +346,30 @@ class StageController{
     this.done = false;
     this.timer = null;
     this.halfTimer = null;
+    this.render();
+    this.wire();
+  }
+
+  // A stage with a `variants` list (e.g. Stage 3's insert-right/insert-left)
+  // can be demoed as more than one starting case — these three helpers pick
+  // whichever is currently selected (falling back to the stage's own
+  // top-level alg/before/hold for a stage with no variants at all) so the
+  // rest of the class never has to branch on "does this stage have variants".
+  activeVariant(){ return (this.data.variants && this.data.variants[this.variantIdx]) || null; }
+  activeAlg(){ return (this.activeVariant() || this.data).alg; }
+  activeBefore(){ return (this.activeVariant() || this.data).before; }
+  activeHold(){ return (this.activeVariant() || this.data).hold; }
+  activeTip(){ return (this.activeVariant() || this.data).tip; }
+
+  // Switches which starting case this stage's demo plays, then fully rebuilds
+  // the cube/movelist/labels from scratch — same as a fresh mount, just with
+  // a different variant selected. Used by the "Starting case" picker below.
+  selectVariant(vi){
+    if(vi === this.variantIdx) return;
+    this.playing = false; clearTimeout(this.timer); clearTimeout(this.halfTimer);
+    this.variantIdx = vi;
+    this.moves = this.activeAlg().split(' ');
+    this.idx = 0; this.animating = false;
     this.render();
     this.wire();
   }
@@ -347,8 +382,15 @@ class StageController{
           <h2>${this.data.title}</h2>
           <p>${this.data.desc}</p>
         </div>
-        <div class="stage-alg-pill">${this.data.alg}</div>
+        <div class="stage-alg-pill">${this.activeAlg()}</div>
       </div>
+      ${this.data.variants && this.data.variants.length>1 ? `
+      <div class="variant-picker" role="group" aria-label="Starting case for this demo">
+        <span class="variant-picker-label">Starting case:</span>
+        <div class="variant-opts">
+          ${this.data.variants.map((v,vi)=>`<button type="button" class="variant-opt${vi===this.variantIdx?' active':''}" data-variant="${vi}">${v.label}</button>`).join('')}
+        </div>
+      </div>` : ''}
       <div class="console">
         <div class="cube-col">
           <div class="cube-viewport">
@@ -375,8 +417,8 @@ class StageController{
           <a class="ft-pill practice-link" href="finger-training.html?stage=${this.index+1}">&#9995; Practice this algorithm full-screen</a>
         </div>
       </div>
-      ${this.data.hold ? `<div class="hold-tip"><strong>&#9995; Hold it like this:</strong> ${this.data.hold}</div>` : ''}
-      <div class="guide-tip"><strong>Tip:</strong> ${this.data.tip}</div>
+      ${this.activeHold() ? `<div class="hold-tip"><strong>&#9995; Hold it like this:</strong> ${this.activeHold()}</div>` : ''}
+      <div class="guide-tip"><strong>Tip:</strong> ${this.activeTip()}</div>
       ${this.data.cases && this.data.cases.length ? `
       <details class="cases-box">
         <summary>My cube doesn't look like the example — other starting cases</summary>
@@ -415,6 +457,11 @@ class StageController{
     });
 
     this.cubies = this.initCube();
+    // this.done survives a variant switch (it's a plain JS flag, not part of
+    // the DOM render() just rebuilt) but the freshly-rendered .stage-num
+    // element doesn't know that yet — reapply the checkmark so switching a
+    // starting case never visually "un-completes" an already-finished stage.
+    if(this.done) this.numEl.classList.add('done');
   }
 
   // Builds a fresh solved cube, then (a) physically flips it 180° if this
@@ -429,7 +476,7 @@ class StageController{
         c.stickers = c.stickers.map(s=>({ normal: rotVec(s.normal, 'x', 180), color:s.color }));
       });
     }
-    (this.data.before||[]).forEach(m => applyMoveLogic(cubies, m));
+    (this.activeBefore()||[]).forEach(m => applyMoveLogic(cubies, m));
     cubies.forEach(c=>{ positionCubie(c); renderCubie(c); });
     return cubies;
   }
@@ -448,6 +495,11 @@ class StageController{
       row.addEventListener('click', ()=>{
         const target = parseInt(row.dataset.i,10);
         this.jumpTo(target+1);
+      });
+    });
+    this.el.querySelectorAll('.variant-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        this.selectVariant(parseInt(btn.dataset.variant,10));
       });
     });
   }

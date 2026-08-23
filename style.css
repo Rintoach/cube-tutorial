@@ -410,6 +410,26 @@
   }
   .hold-tip strong{ color:#fff; }
 
+  /* ---- starting-case picker (e.g. Stage 3's insert-right / insert-left) —
+     switches the whole demo (cube, algorithm, hold text) to a different
+     real starting case instead of only describing the alternate in text. ---- */
+  .variant-picker{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-top:14px;
+  }
+  .variant-picker-label{
+    font:700 11px var(--font-mono); letter-spacing:.06em; text-transform:uppercase;
+    color:var(--text-faint);
+  }
+  .variant-opts{ display:flex; gap:4px; background:var(--surface-2); border:1px solid var(--border-soft); border-radius:9px; padding:3px; }
+  .variant-opt{
+    border:none; background:transparent; color:var(--text-faint);
+    font-family:var(--font-mono); font-size:12px; font-weight:700;
+    padding:6px 12px; border-radius:6px; cursor:pointer;
+  }
+  .variant-opt:hover{ color:var(--text); }
+  .variant-opt.active{ background:var(--accent); color:#001820; }
+
   /* ---- other starting cases (collapsible, closed by default) ---- */
   .cases-box{
     margin-top:12px;
