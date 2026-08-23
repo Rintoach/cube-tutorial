@@ -117,6 +117,7 @@ class Trainer{
     this.casesBoxEl = document.getElementById('tiCasesBox');
     this.casesListEl = document.getElementById('tiCasesList');
     this.diagramEl = document.getElementById('tiDiagram');
+    this.workflowEl = document.getElementById('tiWorkflow');
     this.playBtn = document.querySelector('[data-act="trplay"]');
     this.arrows = {
       top: this.viewportEl.querySelector('.move-arrow.pos-top'),
@@ -254,6 +255,21 @@ class Trainer{
     } else {
       this.diagramEl.style.display = 'none';
       this.diagramEl.innerHTML = '';
+    }
+
+    // Stage 7's numbered "repeat for each corner" procedure — same content
+    // the main tutorial shows, so a learner practicing full-screen isn't
+    // left to reconstruct the loop from raw moves alone.
+    if(this.data.workflow && this.data.workflow.length){
+      this.workflowEl.style.display = '';
+      this.workflowEl.innerHTML = `
+        <div class="workflow-box">
+          <div class="workflow-head">Repeat for each corner:</div>
+          <ol class="workflow-list">${this.data.workflow.map(s => `<li>${s}</li>`).join('')}</ol>
+        </div>`;
+    } else {
+      this.workflowEl.style.display = 'none';
+      this.workflowEl.innerHTML = '';
     }
 
     this.buildProgressDots();

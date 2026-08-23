@@ -283,6 +283,40 @@ const STAGE5_DIAGRAMS = `
     ${edgeMatchDiagram(new Set([]), 'No match yet — run once, then re-check')}
   </div>`;
 
+// Stage 7's bottom-view hold diagram: a view looking straight up at the
+// underside of the cube (yellow layer, post-flip). Only the front-right
+// corner is ever the "working slot" — the diagram exists to make that
+// physically unambiguous, and to visually back up the "only D turns
+// between corners, never spin the whole cube" rule with a same-face-stays-
+// down icon rather than just prose.
+const STAGE7_DIAGRAM = `
+  <div class="edge-diagram-row">
+    <figure class="edge-diagram">
+      <svg viewBox="0 0 132 132" role="img" aria-label="Bottom view: work on the front-right corner, yellow facing down">
+        <rect x="26" y="32" width="80" height="80" rx="6" fill="var(--c-core)" stroke="var(--border)" stroke-width="1.5"/>
+        <line x1="66" y1="32" x2="66" y2="112" stroke="var(--border)" stroke-width="1.5"/>
+        <line x1="26" y1="72" x2="106" y2="72" stroke="var(--border)" stroke-width="1.5"/>
+        <rect x="66" y="72" width="40" height="40" rx="4" fill="var(--good-soft)" stroke="var(--good)" stroke-width="2"/>
+        <text x="86" y="96" text-anchor="middle" font-size="11" font-weight="700" fill="var(--good)">HOLD</text>
+        <text x="66" y="24" text-anchor="middle" font-size="8" letter-spacing=".05em" fill="var(--text-faint)" font-family="var(--font-mono)">BACK</text>
+        <text x="66" y="126" text-anchor="middle" font-size="8" letter-spacing=".05em" fill="var(--text-faint)" font-family="var(--font-mono)">FRONT</text>
+        <text x="14" y="76" text-anchor="middle" font-size="8" letter-spacing=".05em" fill="var(--text-faint)" font-family="var(--font-mono)">LEFT</text>
+        <text x="118" y="76" text-anchor="middle" font-size="8" letter-spacing=".05em" fill="var(--text-faint)" font-family="var(--font-mono)">RIGHT</text>
+      </svg>
+      <figcaption>Looking up at the bottom (yellow) layer — always work on the front-right corner, yellow facing down.</figcaption>
+    </figure>
+    <figure class="edge-diagram">
+      <svg viewBox="0 0 132 132" role="img" aria-label="Between corners, turn only the bottom layer — never spin the whole cube">
+        <rect x="26" y="32" width="80" height="80" rx="6" fill="none" stroke="var(--border-soft)" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <rect x="26" y="72" width="80" height="40" rx="6" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="2"/>
+        <path d="M 36 92 A 30 30 0 1 1 40 104" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M 40 104 l -8 -2 l 3 -8 z" fill="var(--accent)"/>
+        <text x="66" y="96" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent)">D</text>
+      </svg>
+      <figcaption>Between corners, turn only the bottom (D) layer to bring in the next one — never rotate the whole cube or touch the top layer.</figcaption>
+    </figure>
+  </div>`;
+
 const STAGES = [
   { title:"White Cross", desc:"Solve the four white edges around the bottom center, matching each edge's side color to its center.",
     alg:"F2 R2", before:"R2 F2 F D' F' D".split(' '),
@@ -341,6 +375,14 @@ const STAGES = [
   { title:"Orient Top Corners & Finish", desc:"Flip the cube over, then twist each remaining corner in place until every one shows yellow on the bottom.",
     alg:"R' D' R D", before:"D' R' D R".split(' '), flip:true,
     hold:"Flip the whole cube over — the solved white layer is now on top, yellow is on the bottom. Hold a wrong-way yellow corner at the front-right-<em>bottom</em> and never rotate anything except the right layer and (between corners) the bottom layer — the top layer doesn't turn again for the rest of the solve.",
+    diagramHTML: STAGE7_DIAGRAM,
+    workflow:[
+      "Hold the working corner at front-right-bottom, yellow facing down (not up).",
+      "Repeat <code>R' D' R D</code> — 2 times or 4 times, never an odd number — until that one corner shows yellow on the bottom.",
+      "Turn <strong>only the bottom (D) layer</strong> — never the whole cube, never the top — to bring the next wrong-way corner into that same front-right-bottom spot.",
+      "Repeat from step 1 for each remaining corner. The rest of the bottom layer may look scrambled in between corners — that's expected, it locks together once all four are fixed.",
+      "Once all four corners show yellow on the bottom, flip the whole cube back over to see it solved.",
+    ],
     tip:'Look for <strong>yellow facing down</strong> at the front-right-bottom corner, not up — after the flip, yellow is the color finishing on the bottom, and it\'s easy to keep habitually checking for yellow on top out of muscle memory from every earlier stage. Repeat <code>R\' D\' R D</code> <strong>two or four times, never an odd number</strong>, on that corner until it shows yellow on the bottom: each repetition twists the corner one step around its three possible orientations, so depending on which way it started twisted, it needs either 2 or 4 reps to land yellow-down — if it\'s not solved after 2, it will be after 4. Then turn <em>only the bottom layer</em> to bring the next wrong corner into that same spot and repeat — never the top, or you\'ll undo corners you already fixed. The rest of the bottom layer may look scrambled in between corners — that\'s expected, it locks together once all four are fixed. Flip the cube back over at the end to see it solved.',
     checklist:["Every corner shows yellow on the bottom (check all four before flipping back)", "Flipping the cube back over shows all six faces solid — no layer still looks scrambled", "If anything's still off after flipping back, don't force more turns — re-flip and recheck each corner before trying again"] },
 ];
@@ -407,6 +449,7 @@ class StageController{
   activeHold(){ return (this.activeVariant() || this.data).hold; }
   activeTip(){ return (this.activeVariant() || this.data).tip; }
   activeDiagram(){ return (this.activeVariant() || this.data).diagramHTML; }
+  activeWorkflow(){ return (this.activeVariant() || this.data).workflow; }
 
   // Switches which starting case this stage's demo plays, then fully rebuilds
   // the cube/movelist/labels from scratch — same as a fresh mount, just with
@@ -466,6 +509,13 @@ class StageController{
       </div>
       ${this.activeHold() ? `<div class="hold-tip"><strong>&#9995; Hold it like this:</strong> ${this.activeHold()}</div>` : ''}
       ${this.activeDiagram() || ''}
+      ${this.activeWorkflow() && this.activeWorkflow().length ? `
+      <div class="workflow-box">
+        <div class="workflow-head">Repeat for each corner:</div>
+        <ol class="workflow-list">
+          ${this.activeWorkflow().map(step => `<li>${step}</li>`).join('')}
+        </ol>
+      </div>` : ''}
       <div class="guide-tip"><strong>Tip:</strong> ${this.activeTip()}</div>
       ${this.data.cases && this.data.cases.length ? `
       <details class="cases-box">
