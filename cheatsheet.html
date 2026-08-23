@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Quick Reference — Cube Solve Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="cheatsheet.css">
+</head>
+<body class="cheatsheet-page">
+
+  <nav class="stepnav no-print">
+    <div class="stepnav-inner">
+      <div class="stepnav-brand"><span class="dot"></span>CUBE CONSOLE</div>
+      <a class="ft-pill" href="index.html">&#8592; Back to tutorial</a>
+      <button class="ft-pill cs-print-btn" id="printBtn" type="button">&#128424; Print / save as PDF</button>
+    </div>
+  </nav>
+
+  <main class="cs-sheet">
+    <header class="cs-head">
+      <h1>Cube Solve — Quick Reference</h1>
+      <p class="cs-sub">A memory jogger for while you're holding the cube — not a teaching page. If a step doesn't make sense, go back to the full tutorial for the explanation and animation.</p>
+    </header>
+
+    <section class="cs-section">
+      <h2>Notation</h2>
+      <div class="cs-notation-grid" id="csNotationGrid"></div>
+      <p class="cs-modifier-note">A letter alone = quarter turn clockwise (viewed from that face). <strong>'</strong> (prime) = quarter turn counter-clockwise. <strong>2</strong> = half turn (180°) — direction doesn't matter.</p>
+    </section>
+
+    <section class="cs-section">
+      <h2>Standard Hold</h2>
+      <p class="cs-hold-note">White on the bottom, yellow on top — for Stages 1 through 6. Flip the <em>whole</em> cube only once, at the start of Stage 7 (white ends up on top, yellow on bottom). Never rotate the whole cube at any other point — only the layer named in the formula.</p>
+    </section>
+
+    <section class="cs-section">
+      <h2>The Seven Stages</h2>
+      <table class="cs-stage-table" id="csStageTable">
+        <thead>
+          <tr><th>#</th><th>Stage</th><th>Formula</th><th class="cs-desc-head">Reminder</th></tr>
+        </thead>
+        <tbody id="csStageBody"></tbody>
+      </table>
+    </section>
+
+    <section class="cs-section cs-rules">
+      <h2>Golden Rules</h2>
+      <ul class="cs-rules-list">
+        <li>Only turn the face(s) named in the current formula — rotating the whole cube mid-stage loses your bearings and undoes nothing you actually meant to fix.</li>
+        <li>Between Stage 7 corners, turn <strong>only</strong> the bottom (D) layer to bring in the next one — never the top, never the whole cube.</li>
+        <li>Run each formula the full number of times a stage calls for, then stop and re-check — running it further after it's solved just scrambles it again.</li>
+        <li>One flipped edge, one twisted corner, or one swapped pair <em>by itself</em> means the cube was taken apart and put back together wrong — no formula fixes that. See the "Impossible Cube?" card in the full tutorial for how to recover.</li>
+      </ul>
+    </section>
+
+    <footer class="cs-foot no-print">
+      <a class="ft-pill" href="index.html">&#8592; Back to full tutorial</a>
+      <a class="ft-pill" href="finger-training.html">&#9995; Practice trainer</a>
+    </footer>
+  </main>
+
+<script src="cube-engine.js"></script>
+<script src="cheatsheet.js"></script>
+</body>
+</html>
