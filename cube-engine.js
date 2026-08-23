@@ -238,6 +238,51 @@ const FACE_INFO = [
 //     slot — so an odd count isn't just "the wrong parity," it's checking a
 //     different piece entirely. Only even counts return the original target
 //     corner to that slot to be checked.
+// Small top-view schematic for Stage 5's three diagnosis branches (adjacent /
+// opposite / no matching pair). Deliberately color-agnostic — a learner's own
+// cube can have any color arrangement, so "matched" is shown as a checkmark,
+// never a specific color, matching the "trust the centers, not the colors
+// shown here" rule from Cube Basics. `matched` is a Set of 'front'|'back'|
+// 'left'|'right' — whichever positions currently show a side color matching
+// the center below them.
+function edgeMatchDiagram(matched, caption){
+  // All coordinates kept within the 0..120 x 0..130 viewBox, including label
+  // text — an earlier version anchored LEFT/RIGHT labels past the edge of
+  // the canvas and got silently clipped to a single letter.
+  const tabs = {
+    back:  { x:45, y:12, w:30, h:20, lx:60, ly:7   },
+    front: { x:45, y:92, w:30, h:20, lx:60, ly:126 },
+    left:  { x:10, y:47, w:20, h:30, lx:20, ly:42  },
+    right: { x:90, y:47, w:20, h:30, lx:100,ly:42  },
+  };
+  const tabSvg = Object.entries(tabs).map(([side, t]) => {
+    const ok = matched.has(side);
+    const fill = ok ? 'var(--good-soft)' : 'var(--surface-2)';
+    const stroke = ok ? 'var(--good)' : 'var(--border-soft)';
+    const glyphColor = ok ? 'var(--good)' : 'var(--text-faint)';
+    const glyph = ok ? '&#10003;' : '?';
+    const cx = t.x + t.w/2, cy = t.y + t.h/2;
+    return `
+      <rect x="${t.x}" y="${t.y}" width="${t.w}" height="${t.h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+      <text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="13" font-weight="700" fill="${glyphColor}">${glyph}</text>
+      <text x="${t.lx}" y="${t.ly}" text-anchor="middle" font-size="8" letter-spacing=".05em" fill="var(--text-faint)" font-family="var(--font-mono)">${side.toUpperCase()}</text>`;
+  }).join('');
+  return `
+    <figure class="edge-diagram">
+      <svg viewBox="0 0 120 132" role="img" aria-label="${caption.replace(/"/g,'&quot;')}">
+        <rect x="30" y="32" width="60" height="60" rx="6" fill="var(--c-core)" stroke="var(--border)" stroke-width="1.5"/>
+        ${tabSvg}
+      </svg>
+      <figcaption>${caption}</figcaption>
+    </figure>`;
+}
+const STAGE5_DIAGRAMS = `
+  <div class="edge-diagram-row">
+    ${edgeMatchDiagram(new Set(['back','right']), 'Adjacent match — hold these two at back + right, then run the formula')}
+    ${edgeMatchDiagram(new Set(['front','back']), 'Opposite match — no direct placement yet: run once, then re-check')}
+    ${edgeMatchDiagram(new Set([]), 'No match yet — run once, then re-check')}
+  </div>`;
+
 const STAGES = [
   { title:"White Cross", desc:"Solve the four white edges around the bottom center, matching each edge's side color to its center.",
     alg:"F2 R2", before:"R2 F2 F D' F' D".split(' '),
@@ -279,6 +324,7 @@ const STAGES = [
   { title:"Match Top Edges", desc:"Swap the front and left yellow edges so each one lines up with its matching side center (the cross stays a cross the whole time).",
     alg:"R U R' U R U2 R' U", before:"U' R U2 R' U' R U' R' R U' L' U R' U' L U".split(' '),
     hold:"Yellow layer on top. Spin the top layer until you find two edges that already match their center. Hold the cube so those two sit at the <strong>back</strong> and <strong>right</strong> — the two mismatched edges end up at the front and left, which is exactly what this formula swaps.",
+    diagramHTML: STAGE5_DIAGRAMS,
     tip:'This trigger swaps only the <strong>front</strong> and <strong>left</strong> yellow edges and leaves back/right alone. If your two matching edges are already opposite each other rather than side-by-side, run it once, spin the top to re-diagnose which two now match, then run it again on whichever pair is still wrong.',
     cases:[
       { title:"No adjacent matching pair", body:'This algorithm is a single fixed swap: it always swaps whatever sits at front and left, and always leaves back and right exactly where they are — so it can only place two matches that are already sitting side-by-side. If you don\'t have that — zero matches, one match, or two matches directly opposite each other — there is no one-shot placement that solves it immediately. Run the formula once, then inspect the four side colors again before deciding what to do next.' },
@@ -360,6 +406,7 @@ class StageController{
   activeBefore(){ return (this.activeVariant() || this.data).before; }
   activeHold(){ return (this.activeVariant() || this.data).hold; }
   activeTip(){ return (this.activeVariant() || this.data).tip; }
+  activeDiagram(){ return (this.activeVariant() || this.data).diagramHTML; }
 
   // Switches which starting case this stage's demo plays, then fully rebuilds
   // the cube/movelist/labels from scratch — same as a fresh mount, just with
@@ -418,6 +465,7 @@ class StageController{
         </div>
       </div>
       ${this.activeHold() ? `<div class="hold-tip"><strong>&#9995; Hold it like this:</strong> ${this.activeHold()}</div>` : ''}
+      ${this.activeDiagram() || ''}
       <div class="guide-tip"><strong>Tip:</strong> ${this.activeTip()}</div>
       ${this.data.cases && this.data.cases.length ? `
       <details class="cases-box">

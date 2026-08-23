@@ -116,6 +116,7 @@ class Trainer{
     this.holdEl = document.getElementById('tiHold');
     this.casesBoxEl = document.getElementById('tiCasesBox');
     this.casesListEl = document.getElementById('tiCasesList');
+    this.diagramEl = document.getElementById('tiDiagram');
     this.playBtn = document.querySelector('[data-act="trplay"]');
     this.arrows = {
       top: this.viewportEl.querySelector('.move-arrow.pos-top'),
@@ -242,6 +243,17 @@ class Trainer{
       ).join('');
     } else {
       this.casesBoxEl.style.display = 'none';
+    }
+
+    // Same visual diagnosis aid the main tutorial shows (e.g. Stage 5's
+    // adjacent/opposite/no-match diagram) — practice mode gets the same
+    // "how do I tell which case I'm in" help, not just raw moves.
+    if(this.data.diagramHTML){
+      this.diagramEl.style.display = '';
+      this.diagramEl.innerHTML = this.data.diagramHTML;
+    } else {
+      this.diagramEl.style.display = 'none';
+      this.diagramEl.innerHTML = '';
     }
 
     this.buildProgressDots();
