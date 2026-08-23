@@ -264,6 +264,24 @@
 
   /* ---- cube viewport & arrows ---- */
   .cube-col{ display:flex; flex-direction:column; gap:14px; }
+
+  /* ---- persistent orientation reminder — shown above the cube on every
+     stage so "which way am I holding this" is never something a learner
+     has to remember from a one-time explanation. Only Stage 7 (.flip)
+     switches it, with an explicit warning rather than a silent change. ---- */
+  .orient-badge{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    text-align:center;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.03em;
+    color:var(--text-dim);
+    background:var(--surface-2); border:1px solid var(--border-soft);
+    border-radius:9px; padding:7px 10px;
+  }
+  .orient-badge.flip{
+    color:var(--warn); background:var(--warn-soft); border-color:var(--warn);
+  }
+  .orient-badge strong{ color:inherit; font-size:11.5px; }
+  .orient-badge span{ color:inherit; opacity:.9; }
   .cube-viewport{
     position:relative;
     height:268px;

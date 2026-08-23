@@ -517,6 +517,11 @@ class StageController{
       </div>` : ''}
       <div class="console">
         <div class="cube-col">
+          <div class="orient-badge${this.data.flip ? ' flip' : ''}">
+            ${this.data.flip
+              ? '<strong>&#9888; Now flip the whole cube</strong><span>White centre: TOP &middot; Yellow centre: BOTTOM</span>'
+              : '<span>White centre: BOTTOM &middot; Yellow centre: TOP</span>'}
+          </div>
           <div class="cube-viewport">
             <div class="cube-scene"></div>
             <div class="move-arrow pos-top"><span class="arrow-glyph"></span><span class="move-badge"></span></div>
