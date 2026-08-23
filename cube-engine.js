@@ -339,6 +339,13 @@ const STAGE1_DIAGRAMS = `
 const STAGES = [
   { title:"White Cross", desc:"Solve the four white edges around the bottom center, matching each edge's side color to its center.",
     alg:"F2 R2", before:"R2 F2 F D' F' D".split(' '),
+    // This stage isn't one fixed formula the way later stages are — it's a
+    // repeated goal (free an edge, then insert it) applied up to four times,
+    // from whichever face each edge happens to need. goalFlow gives that
+    // process its own headline above the demo; algNote stops the pill below
+    // from reading as "the" algorithm for the whole stage.
+    goalFlow:["Build the Daisy", "Match each petal's outer color to its center", "Turn that face 180°", "Check the white cross"],
+    algNote:"This is just one petal's insert, shown for whichever face happens to need it here — not a fixed formula for the whole stage. You'll repeat the same idea (find, free, insert) from a different face for each of the other three petals.",
     hold:"Hold the cube with white on the bottom and yellow on top — this is the orientation you'll keep all the way through Stage 6. The demo starts from a scrambled cross on purpose so you can see edges being placed, not just admired.",
     diagramHTML: STAGE1_DIAGRAMS,
     tip:'This stage is two habits, not one algorithm. <strong>First, build a daisy:</strong> find all four white edges, wherever they currently are, and bring each one up into the top layer so its white sticker points straight up — sitting next to the yellow center like the petals of a daisy. <strong>Then insert each petal:</strong> turn the top layer (<code>U</code>) until a petal\'s outer color lines up with its matching center below, then spin that face <code>180°</code> — the white edge flips down into the cross. Repeat for the other three petals in any order; inserting one never disturbs the others already placed.',
@@ -492,8 +499,15 @@ class StageController{
           <h2>${this.data.title}</h2>
           <p>${this.data.desc}</p>
         </div>
-        <div class="stage-alg-pill">${this.activeAlg()}</div>
+        <div class="stage-pill-col">
+          <div class="stage-alg-pill">${this.activeAlg()}</div>
+          ${this.data.algNote ? `<div class="alg-note">${this.data.algNote}</div>` : ''}
+        </div>
       </div>
+      ${this.data.goalFlow && this.data.goalFlow.length ? `
+      <div class="goal-flow" aria-label="Overall goal for this stage">
+        ${this.data.goalFlow.map((step, gi) => `${gi>0 ? '<span class="goal-flow-arrow">&#8594;</span>' : ''}<span class="goal-flow-step">${step}</span>`).join('')}
+      </div>` : ''}
       ${this.data.variants && this.data.variants.length>1 ? `
       <div class="variant-picker" role="group" aria-label="Starting case for this demo">
         <span class="variant-picker-label">Starting case:</span>
